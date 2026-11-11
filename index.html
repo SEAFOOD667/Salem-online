@@ -97,7 +97,7 @@ function act(S,id,a){const p=P(S,id),me=S.players[S.turn];
 if(a.t==='join'){if(S.ph!=='lobby'||P(S,id)||S.players.length>=12)return;S.players.push({id,name:String(a.name||'ผู้เล่น').slice(0,14)});return}
 if(a.t==='bot'){if(S.ph==='lobby'&&id===S.host&&S.players.length<12){const n=S.players.filter(x=>x.bot).length+1;S.players.push({id:'bot'+Date.now()+n,name:'🤖บอท'+n,bot:1})}return}
 if(a.t==='leave'){if(p&&S.ph==='lobby')S.players=S.players.filter(x=>x.id!==id);else if(p&&S.ph!=='end'){p.bot=1;p.left=1;p.ready=true;lg(S,`${p.name} ออกจากเกม (บอทเล่นแทน)`)}return}
-if(a.t==='rematch'){if(S.ph==='end'&&id===S.host){const c=S.code,h=S.host,ak=S.ak,an=S.anns,keep=S.players.filter(x=>!x.left).map(x=>x.bot?{id:x.id,name:x.name,bot:1}:{id:x.id,name:x.name});for(const k of Object.keys(S))delete S[k];Object.assign(S,{ph:'lobby',host:h,code:c,players:keep,log:[],ak,anns:an});seen={};try{db.collection(`rooms/${c}/act`).get().then(old=>{if(old.size){const batch=db.batch();old.docs.forEach(d=>batch.delete(d.ref));batch.commit()}})}catch(e){}}return}
+if(a.t==='rematch'){if(S.ph==='end'&&id===S.host){const c=S.code,h=S.host,ak=S.ak,an=S.anns,keep=S.players.filter(x=>!x.left).map(x=>x.bot?{id:x.id,name:x.name,bot:1}:{id:x.id,name:x.name});for(const k of Object.keys(S))delete S[k];Object.assign(S,{ph:'lobby',host:h,code:c,players:keep,log:[],ak,anns:an});seen={};try{['act','joins'].forEach(col=>db.collection(`rooms/${c}/${col}`).get().then(old=>{if(old.size){const batch=db.batch();old.docs.forEach(d=>batch.delete(d.ref));batch.commit()}}))}catch(e){}}return}
 if(a.t==='start'){if(S.ph==='lobby'&&id===S.host&&S.players.length>=4)startGame(S);return}
 if(!p)return;
 if(a.t==='ready'&&S.ph==='reveal'){p.ready=true;if(S.players.every(x=>x.ready)){S.players.forEach(x=>x.wr=!hasW(x)||!!x.bot);S.ph='wsee';lg(S,'👁 แม่มดลืมตาดูหน้ากัน');if(S.players.every(x=>x.wr))toDawn(S)}return}
@@ -140,16 +140,41 @@ let lastJ='';function publish(){dirty=1;if(busy)return;busy=1;(async()=>{while(d
 function hostAct(id,a){try{act(S,id,a)}catch(e){console.error(e)}publish();render()}
 function send(a){if(isHost)hostAct(uid,a);else{q.push({n:++seq,a});q=q.slice(-8);db.doc(`rooms/${code}/act/${uid}`).set({q}).catch(()=>{})}}
 function clearJoinRetry(){if(joinRetry){clearInterval(joinRetry);joinRetry=null}}
+async function requestJoin(name){
+  if(!db||!code||!uid)return;
+  const n=String(name||'ผู้เล่น').slice(0,14);
+  try{await db.doc(`rooms/${code}/joins/${uid}`).set({name:n,ts:Date.now()})}catch(e){console.error('join write failed',e)}
+  // ส่งผ่าน act ด้วยเป็นทางสำรอง
+  try{send({t:'join',name:n})}catch(e){}
+}
+function absorbJoins(docs){
+  if(!S||S.ph!=='lobby')return false;
+  let changed=false;
+  docs.forEach(d=>{
+    const id=d.id, data=(typeof d.data==='function'?d.data():d.data)||{};
+    if(!id||id===uid)return;
+    if(P(S,id)||S.players.length>=12)return;
+    S.players.push({id,name:String(data.name||'ผู้เล่น').slice(0,14)});
+    changed=true;
+    try{if(d.ref)d.ref.delete().catch(()=>{})}catch(e){}
+  });
+  return changed;
+}
 var enter=async function(c,create,name){code=c.toUpperCase();myName=name;clearJoinRetry();seen={};q=[];seq=Date.now();
 if(create){isHost=true;S={ph:'lobby',host:uid,code,players:[{id:uid,name}],log:[]};if(!await tmo(db.doc('rooms/'+code).set({s:JSON.stringify(S)}).then(()=>1),10000))throw 'สร้างห้องไม่สำเร็จ (หมดเวลา)';
-try{const old=await db.collection(`rooms/${code}/act`).get();if(old.size){const batch=db.batch();old.docs.forEach(d=>batch.delete(d.ref));await batch.commit()}}catch(e){}}
+try{for(const col of ['act','joins']){const old=await db.collection(`rooms/${code}/${col}`).get();if(old.size){const batch=db.batch();old.docs.forEach(d=>batch.delete(d.ref));await batch.commit()}}}catch(e){}}
 else{const s=await tmo(db.doc('rooms/'+code).get(),10000);if(!s)throw 'เชื่อมต่อห้องหมดเวลา';if(!s.exists){toast('ไม่พบห้อง '+code);code=null;return}const d=JSON.parse(s.data().s);if(d.host===uid)isHost=true;S=d}
 try{sessionStorage.setItem('sl',JSON.stringify({c:code,n:name}))}catch(e){}
 unsubs=[db.doc('rooms/'+code).onSnapshot(s=>{if(s.exists&&!isHost){S=JSON.parse(s.data().s);if(S.closed){leaveLocal('หัวหน้าห้องปิดห้องแล้ว');return}render()}})];
-if(isHost){unsubs.push(db.collection(`rooms/${code}/act`).onSnapshot(sn=>{sn.docs.forEach(d=>{const id=d.id;for(const e of d.data().q||[])if(e.n>(seen[id]||0)){seen[id]=e.n;hostAct(id,e.a)}})}));publish()}
-else{send({t:'join',name});let tries=0;joinRetry=setInterval(()=>{if(!S||S.ph!=='lobby'||P(S,uid)||++tries>8){clearJoinRetry();return}send({t:'join',name:myName})},2000)}
+if(isHost){
+unsubs.push(db.collection(`rooms/${code}/act`).onSnapshot(sn=>{sn.docs.forEach(d=>{const id=d.id;for(const e of d.data().q||[])if(e.n>(seen[id]||0)){seen[id]=e.n;hostAct(id,e.a)}})}));
+unsubs.push(db.collection(`rooms/${code}/joins`).onSnapshot(sn=>{if(absorbJoins(sn.docs)){publish();render()}}));
+publish()}
+else{requestJoin(name);let tries=0;joinRetry=setInterval(()=>{if(!S||S.ph!=='lobby'||P(S,uid)||++tries>12){clearJoinRetry();return}requestJoin(myName)},1200)}
 unsubs.push(db.collection(`rooms/${code}/chat`).onSnapshot(sn=>{CHAT=sn.docs.map(d=>d.data()).sort((a,b)=>a.ts-b.ts);chatRender()}));render()};
-setInterval(()=>{if(!S)return;if(isHost){if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}render()}else{const e=document.getElementById('cd');const T=S.night||S.cons;if(e&&T)e.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}},1100);
+setInterval(()=>{if(!S)return;if(isHost){
+if(S.ph==='lobby'){db.collection(`rooms/${code}/joins`).get().then(snap=>{if(absorbJoins(snap.docs)){publish();render()}}).catch(()=>{})}
+if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}render()}else{const e=document.getElementById('cd');const T=S.night||S.cons;if(e&&T)e.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}},1100);
 // ===== UI =====
 const me=()=>S&&P(S,uid);
 let NOTE='';function toast(m){NOTE=m;if(!S)home()}
