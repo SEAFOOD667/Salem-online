@@ -11,7 +11,7 @@ input{padding:8px;border-radius:8px;border:1px solid #8a6a40;background:#150f0a;
 .seat{position:absolute;transform:translate(-50%,-50%);background:#0007;border-radius:10px;padding:3px;text-align:center;font-size:11px;width:max-content;max-width:30%}
 .seat.cur{outline:3px solid #ffd35a}.seat.dead{opacity:.45;filter:grayscale(1)}.seat.tg{outline:3px dashed #7fe0ff;cursor:pointer}
 .row{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}.ctr{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);text-align:center}
-.ov{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:9;padding:10px}.ov>div{background:var(--pn);border-radius:14px;padding:14px;max-width:560px;max-height:92vh;overflow:auto;text-align:center}
+.ov{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:250;padding:10px}.ov>div:not(.ov-sheet){background:var(--pn);border-radius:14px;padding:14px;max-width:560px;max-height:92vh;overflow:auto;text-align:center;width:100%}
 .cd{cursor:pointer}.hand{display:flex;gap:4px;flex-wrap:wrap}.hand svg:hover{transform:translateY(-6px)}.sel{outline:3px solid #7fe0ff;border-radius:8px}
 .nm{font-size:42px}.rv{opacity:.38;filter:grayscale(.8)}.fly{position:fixed;left:0;top:0;pointer-events:none;z-index:120;filter:drop-shadow(0 8px 8px #000a)}.hand svg{transition:transform .15s}.seat.cur{box-shadow:0 0 18px #ffd35a88}
 #chat{position:fixed;top:0;bottom:0;left:0;right:0;z-index:200;pointer-events:none;display:grid;grid-template-columns:var(--chat-w) 1fr var(--chat-w);font-size:13px}
@@ -32,8 +32,8 @@ input{padding:8px;border-radius:8px;border:1px solid #8a6a40;background:#150f0a;
 .pn{padding:8px;margin:4px 0;border-radius:10px}
 .hand{gap:6px;justify-content:center}
 .hand svg{width:64px !important}
-.ov{padding:8px;align-items:flex-end}
-.ov>div{max-width:100%;width:100%;max-height:88vh;border-radius:16px 16px 0 0;padding:16px 12px calc(16px + env(safe-area-inset-bottom,0px))}
+.ov{padding:0;align-items:flex-end;z-index:250}
+.ov>div:not(.ov-sheet){max-width:100%;width:100%;max-height:90vh;border-radius:16px 16px 0 0;padding:16px 12px calc(16px + env(safe-area-inset-bottom,0px))}
 button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .deck-click{padding:8px 14px}
 #chat{position:fixed;top:auto;left:0;right:0;bottom:0;height:min(48vh,380px);max-height:55vh;grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:0;z-index:220;transform:translateY(110%);transition:transform .25s ease;pointer-events:none;padding-bottom:env(safe-area-inset-bottom,0px);border-top:2px solid #6b4a2a;box-shadow:0 -8px 28px #000a}
@@ -108,6 +108,18 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .as-item{display:flex;align-items:center;gap:6px}
 .as-label{opacity:.85;white-space:nowrap}
 @media(max-width:900px){.action-strip{padding:4px 6px;gap:8px}.as-item svg{width:36px !important}}
+
+.ov-sheet{display:flex;flex-direction:column;max-height:min(92vh,640px);width:100%;max-width:560px;background:var(--pn);border-radius:14px;overflow:hidden;text-align:center;box-sizing:border-box}
+.ov-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 14px 8px;overscroll-behavior:contain}
+.ov-foot{flex:0 0 auto;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid #6b4a2a55;background:var(--pn)}
+.ov-foot button{width:100%;max-width:320px;min-height:48px;font-size:16px;margin:0}
+.ov-hint{font-size:13px;opacity:.9}
+@media(max-width:900px){
+.ov{align-items:flex-end !important;padding:0 !important;z-index:250}
+.ov-sheet{max-width:100% !important;width:100% !important;max-height:92vh !important;height:auto;border-radius:16px 16px 0 0 !important;padding:0 !important;overflow:hidden !important}
+.ov-body{padding:12px 12px 6px;max-height:none}
+.ov-foot{padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px))}
+}
 </style></head><body><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -265,7 +277,7 @@ else{requestJoin(name);let tries=0;joinRetry=setInterval(()=>{if(!S||S.ph!=='lob
 unsubs.push(db.collection(`rooms/${code}/chat`).onSnapshot(sn=>{CHAT=sn.docs.map(d=>d.data()).sort((a,b)=>a.ts-b.ts);chatRender()}));render()};
 setInterval(()=>{if(!S)return;if(isHost){
 if(S.ph==='lobby'){db.collection(`rooms/${code}/joins`).get().then(snap=>{if(absorbJoins(snap.docs)){publish();render()}}).catch(()=>{})}
-if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}render()}else{const e=document.getElementById('cd');const T=S.night||S.cons;if(e&&T)e.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}},1100);
+if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}if(S.ph==='reveal'||S.ph==='wsee'||S.ph==='dawn'){/* อย่า rebuild overlay ทุกวินาที */const cd=document.getElementById('cd');const T=S.night||S.cons;if(cd&&T)cd.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}else render()}else{const e=document.getElementById('cd');const T=S.night||S.cons;if(e&&T)e.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}},1100);
 // ===== UI =====
 const me=()=>S&&P(S,uid);
 let NOTE='';function toast(m){NOTE=m;if(!S)home()}
@@ -305,9 +317,9 @@ if(S.ph==='lobby'){U.endClosed=0;A.innerHTML=`<div class="pn" style="text-align:
 if(!p){A.innerHTML='<div class="pn">เกมเริ่มไปแล้ว</div>';return}
 const m=S.players.indexOf(p),n=S.players.length,cur=S.players[S.turn],my=S.ph==='play'&&cur===p&&!S.pend;let ov='',msg='';
 const role=hasW(p)?'🧙 แม่มด (Witch)':'⛪ ชาวบ้าน',con=isC(p)?' + Constable ⚖':'';
-if(S.ph==='reveal'&&!p.ready)ov=`<div class="ov"><div><h2>ตัวละครและบทบาทลับของคุณ</h2>${chc(p.ch,170)}<p><b>${esc(TH[p.ch][0])}</b> (${esc(TH[p.ch][1])})<br>${esc(TH[p.ch][2])}${IMPL.includes(p.ch)?'':'<br><small style="opacity:.7">(ความสามารถนี้ยังไม่มีผลในเกม)</small>'}</p><h2>${role}${con}</h2><p>🧙 รอบนี้มีใบแม่มด <b>${S.wc}</b> ใบ จาก Tryal ทั้งหมด ${S.tc} ใบ</p><p>Tryal cards ของคุณ:</p><div class="row">${p.tryal.map(t=>tf(t.t,70)).join('')}</div><p>${hasW(p)?'คุณอยู่ฝั่งแม่มด — ในเฟสถัดไปคุณจะได้เห็นแม่มดคนอื่น (เป็นแม่มดแล้วเป็นตลอดไป)':'คุณอยู่ฝั่งชาวบ้าน — หา Witch ให้เจอทั้งหมด'}</p><button onclick="sd({t:'ready'})">รับทราบ ✔</button></div></div>`;
+if(S.ph==='reveal'&&!p.ready)ov=`<div class="ov"><div class="ov-sheet"><div class="ov-body"><h2>ตัวละครและบทบาทลับของคุณ</h2>${chc(p.ch,150)}<p><b>${esc(TH[p.ch][0])}</b> (${esc(TH[p.ch][1])})<br>${esc(TH[p.ch][2])}${IMPL.includes(p.ch)?'':'<br><small style="opacity:.7">(ความสามารถนี้ยังไม่มีผลในเกม)</small>'}</p><h2>${role}${con}</h2><p>🧙 แม่มด <b>${S.wc}</b> ใบ จาก Tryal ${S.tc} ใบ</p><p>Tryal ของคุณ:</p><div class="row">${p.tryal.map(t=>tf(t.t,64)).join('')}</div><p class="ov-hint">${hasW(p)?'คุณอยู่ฝั่งแม่มด — เฟสถัดไปจะเห็นแม่มดคนอื่น':'คุณอยู่ฝั่งชาวบ้าน — หา Witch ให้เจอทั้งหมด'}</p></div><div class="ov-foot"><button onclick="sd({t:'ready'})">รับทราบ ✔</button></div></div></div>`;
 else if(S.ph==='reveal')msg='รอผู้เล่นอื่นดูบทบาท…';
-if(S.ph==='wsee'){const ws=S.players.filter(hasW);ov=`<div class="ov" style="background:#000e"><div><h2>👁 แม่มดลืมตา</h2>${hasW(p)?`<p>แม่มดทั้งหมดในเกมตอนนี้:</p>${ws.map(w=>`<div style="font-size:18px">🧙 ${esc(w.name)}${w===p?' (คุณ)':''}</div>`).join('')}<br><button ${p.wr?'disabled':''} onclick="sd({t:'wready'})">${p.wr?'รอแม่มดคนอื่น…':'รับทราบ ✔'}</button>`:'<p>แม่มดกำลังลืมตาดูกันเอง…<br>(หลับตาไว้ ห้ามแอบดู)</p>'}</div></div>`}
+if(S.ph==='wsee'){const ws=S.players.filter(hasW);ov=`<div class="ov" style="background:#000e"><div class="ov-sheet"><div class="ov-body"><h2>👁 แม่มดลืมตา</h2>${hasW(p)?`<p>แม่มดทั้งหมดในเกมตอนนี้:</p>${ws.map(w=>`<div style="font-size:18px">🧙 ${esc(w.name)}${w===p?' (คุณ)':''}</div>`).join('')}`:'<p>แม่มดกำลังลืมตาดูกันเอง…<br>(หลับตาไว้ ห้ามแอบดู)</p>'}</div>${hasW(p)?`<div class="ov-foot"><button ${p.wr?'disabled':''} onclick="sd({t:'wready'})">${p.wr?'รอแม่มดคนอื่น…':'รับทราบ ✔'}</button></div>`:''}</div></div>`}
 if(S.ph==='morn'){const rs=S.morn.res;ov=`<div class="ov" style="background:radial-gradient(circle,#4a3a1ae0,#000d)"><div><h2>🌅 รุ่งเช้า</h2><p style="font-size:18px">${rs.k==='dead'?`💀 ${esc(rs.name)} ถูกฆ่าตายเมื่อคืนนี้`:'เมื่อคืนไม่มีใครเสียชีวิต'}</p><p>เกมจะดำเนินต่อในไม่กี่วินาที…</p></div></div>`}
 if(S.ph==='dawn'){const ws=S.players.filter(hasW);ov=`<div class="ov"><div><h2>🌅 Dawn</h2>${hasW(p)?`<p>แม่มดในเกม: ${ws.map(w=>esc(w.name)).join(', ')}</p><p>เลือกผู้รับ Black Cat (เขาจะเป็นคนเริ่มเล่น):</p>${S.players.map(x=>`<button onclick="sd({t:'cat',tg:'${x.id}'})">${esc(x.name)}</button>`).join('')}`:'<p>แม่มดกำลังเลือกผู้รับแมวดำ… (หลับตาไว้)</p>'}</div></div>`}
 if(S.ph==='night'&&p.alive){const c=S.night.cf.includes(p.id),ot=al(S);ov=`<div class="ov" style="background:#000e"><div><div>${card('non',80)}</div><h2>🌙 Night — <span id="cd">${Math.max(0,Math.ceil((S.night.end-Date.now())/1000))}</span> วินาที</h2>${hasW(p)?`<p>🧙 แม่มดทั้งหมดตอนนี้: <b>${S.players.filter(x=>x.alive&&hasW(x)).map(x=>esc(x.name)+((S.night.nw||[]).includes(x.id)?' 🆕':'')).join(', ')}</b><br><small>🆕 = เพิ่งกลายเป็นแม่มด (เป็นแม่มดแล้วเป็นตลอดไป)</small></p><p>โหวตคนที่จะฆ่า: คนที่ได้โหวตสูงสุด (ไม่เสมอ) จะตายตอนเช้า ถ้าไม่สารภาพหรือไม่ถูกช่วย</p>${ot.map(x=>{const c=Object.values(S.night.k).filter(v=>v===x.id).length;return `<button onclick="sd({t:'nk',tg:'${x.id}'})" style="${S.night.k[uid]===x.id?'outline:3px solid #fff':''}">${esc(x.name)}${c?` (${c})`:''}</button>`}).join('')}`:''}${isC(p)?`<p>⚖ Constable: เลือกคนที่จะช่วย (ห้ามเลือกตัวเอง)</p>${ot.filter(x=>x!==p).map(x=>`<button onclick="sd({t:'ns',tg:'${x.id}'})" style="${S.night.sv===x.id?'outline:3px solid #fff':''}">${esc(x.name)}</button>`).join('')}`:''}<hr>${c?'<p>คุณสารภาพแล้ว — ปลอดภัยคืนนี้</p>':U.conf?`<p>เลือก Tryal ของคุณที่จะเปิดเพื่อสารภาพ:</p><div class="row">${unrev(p).map(i=>`<span onclick="U.conf=0;sd({t:'conf',i:${i}})">${tf(p.tryal[i].t,70,'cd')}</span>`).join('')}</div>`:`<button onclick="U.conf=1;render()">🙏 Confess (สารภาพ)</button>`}<p style="font-size:12px">ถ้าเป็นคนอื่นที่ไม่มีบทบาท ให้หลับตา/รอ</p></div></div>`}
@@ -365,7 +377,11 @@ if(op.alive&&!p.alive)bump(seatEl(p.id),[{transform:TS+' rotate(0)'},{transform:
 if(S.log.slice(-6).some(l=>l.includes('🔁')&&!o.log.includes(l))){const a=S.players.filter(x=>x.alive);a.forEach((x,i)=>fly(seatEl(a[(i+1)%a.length].id),seatEl(x.id),tb(34),i*60,1100));conspArrows(a)}
 if(o.ph!==S.ph&&!RM)document.querySelectorAll('.ov>div').forEach(d=>d.animate([{opacity:0,transform:'scale(.9)'},{opacity:1,transform:'scale(1)'}],{duration:450}));
 if(o.turn!==S.turn&&S.ph==='play')bump(seatEl(S.players[S.turn].id),[{transform:TS+' scale(1)'},{transform:TS+' scale(1.14)'},{transform:TS+' scale(1)'}])}finally{prevS=S?JSON.parse(JSON.stringify(S)):null}}
-const r0=render;render=function(){try{chatRender()}catch(e){console.error(e)}if(!S||S.closed){prevS=null;return r0()}r0();try{anim()}catch(e){console.error(e)}try{annCheck()}catch(e){console.error(e)}A.insertAdjacentHTML('afterbegin','<div class="top-bar">'+(S.ph!=='lobby'?'<button onclick="abil()" class="btn-abil">📜 ความสามารถ</button>':'')+'<button onclick="leave()" class="btn-leave">🚪 ออก</button></div>');if(U.lv)A.insertAdjacentHTML('beforeend',`<div class="ov" style="z-index:99"><div><h3>ออกจากเกม?</h3><p>${isHost?'คุณเป็นหัวหน้าห้อง ถ้าออก ห้องจะถูกปิดสำหรับทุกคน':'ถ้าเกมเริ่มแล้ว บอทจะเล่นแทนคุณ'}</p><button onclick="lvYes()">ออกเลย</button><button onclick="lvNo()" style="background:#555">ยกเลิก</button></div></div>`)};
+const r0=render;render=function(){try{chatRender()}catch(e){console.error(e)}if(!S||S.closed){prevS=null;return r0()}
+const ovScroll=document.querySelector('.ov-body,.ov>div');const ovY=ovScroll?ovScroll.scrollTop:0;
+r0();
+const ov2=document.querySelector('.ov-body,.ov>div');if(ov2&&ovY)ov2.scrollTop=ovY;
+try{anim()}catch(e){console.error(e)}try{annCheck()}catch(e){console.error(e)}A.insertAdjacentHTML('afterbegin','<div class="top-bar">'+(S.ph!=='lobby'?'<button onclick="abil()" class="btn-abil">📜 ความสามารถ</button>':'')+'<button onclick="leave()" class="btn-leave">🚪 ออก</button></div>');if(U.lv)A.insertAdjacentHTML('beforeend',`<div class="ov" style="z-index:99"><div><h3>ออกจากเกม?</h3><p>${isHost?'คุณเป็นหัวหน้าห้อง ถ้าออก ห้องจะถูกปิดสำหรับทุกคน':'ถ้าเกมเริ่มแล้ว บอทจะเล่นแทนคุณ'}</p><button onclick="lvYes()">ออกเลย</button><button onclick="lvNo()" style="background:#555">ยกเลิก</button></div></div>`)};
 let CHAT=[],chOpen=0,chTab='all',chSeen={all:0,witch:0},chKey='';
 function isMobile(){return window.matchMedia('(max-width:900px)').matches}
 function ensureChatChrome(){
