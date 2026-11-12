@@ -125,13 +125,19 @@ else if(k==='sca'){if(t===p||!t2?.alive||t2===t||t2===p)ok=0;else{const m=t.fron
 if(!ok){p.hand.splice(a.i,0,k);return}
 if(!keep)S.disc.push(k);lg(S,`${p.name} ใช้ ${CD[k][1]} กับ ${t.name}`)}
 S.mode='play';S.lp={n:p.name,k,t:t.name};fin(S)}}
-function bot(S){if(S.ph==='cons'){for(const b of al(S).filter(x=>x.bot)){if(S.ph==='cons'&&S.cons.picks[b.id]===undefined){const u=unrev(donor(S,b));if(u.length)act(S,b.id,{t:'cpick',i:pick(u)})}}return}
-if(S.ph==='dawn'){const w=S.players.filter(hasW);if(w.every(x=>x.bot)){const o=S.players.filter(x=>!hasW(x));act(S,w[0].id,{t:'cat',tg:pick(o.length?o:S.players).id})}return}
-if(S.ph==='night'){for(const b of al(S).filter(x=>x.bot)){if(hasW(b)&&!S.night.k[b.id]){const v=Object.values(S.night.k)[0]||pick(al(S).filter(x=>!hasW(x)).length?al(S).filter(x=>!hasW(x)):al(S)).id;act(S,b.id,{t:'nk',tg:v})}
+function bot(S){
+const now=Date.now();
+// หน่วงบอทให้อ่าน/ดูทัน: ตาเล่น ~2.8–3.8 วิ, เลือกเปิดไพ่/ทิ้ง ~1.8 วิ, กลางคืน/สมคบคิด ~1.5 วิ
+const wait=(ms)=>{if(now<(S.botAt||0))return true;S.botAt=now+ms;return false};
+if(S.ph==='cons'){if(wait(1500))return;for(const b of al(S).filter(x=>x.bot)){if(S.cons.picks[b.id]===undefined){const u=unrev(donor(S,b));if(u.length)act(S,b.id,{t:'cpick',i:pick(u)})}}return}
+if(S.ph==='dawn'){if(wait(2000))return;const w=S.players.filter(hasW);if(w.every(x=>x.bot)){const o=S.players.filter(x=>!hasW(x));act(S,w[0].id,{t:'cat',tg:pick(o.length?o:S.players).id})}return}
+if(S.ph==='night'){if(wait(1500))return;for(const b of al(S).filter(x=>x.bot)){if(hasW(b)&&!S.night.k[b.id]){const v=Object.values(S.night.k)[0]||pick(al(S).filter(x=>!hasW(x)).length?al(S).filter(x=>!hasW(x)):al(S)).id;act(S,b.id,{t:'nk',tg:v})}
 if(isC(b)&&!S.night.sv)act(S,b.id,{t:'ns',tg:pick(al(S).filter(x=>x!==b)).id})}return}
 if(S.ph!=='play')return;const pe=S.pend;
-if(pe){const b=P(S,pe.by);if(!b.bot)return;if(pe.t==='rev')act(S,b.id,{t:'rev',i:pick(unrev(P(S,pe.tgt)))});else act(S,b.id,{t:'dis',i:Math.random()*b.hand.length|0});return}
-const p=S.players[S.turn];if(!p.bot||!p.alive)return;const o=al(S).filter(x=>x!==p),op=[];
+if(pe){const b=P(S,pe.by);if(!b||!b.bot)return;if(wait(1800))return;if(pe.t==='rev')act(S,b.id,{t:'rev',i:pick(unrev(P(S,pe.tgt)))});else act(S,b.id,{t:'dis',i:Math.random()*b.hand.length|0});return}
+const p=S.players[S.turn];if(!p||!p.bot||!p.alive)return;
+if(wait(2800+Math.random()*1000|0))return;
+const o=al(S).filter(x=>x!==p),op=[];
 p.hand.forEach((k,i)=>{if(isRed(k)){const t=o.filter(x=>!x.front.includes('pie')&&!(hasW(p)&&hasW(x)));if(t.length)op.push({i,tg:pick(t).id})}else if(k==='asy'||k==='pie')op.push({i,tg:pick(o).id});else if(k==='ars'||k==='sto')op.push({i,tg:pick(o).id})});
 act(S,p.id,op.length&&Math.random()<.65?{t:'play',...pick(op)}:{t:S.mode==='play'?'end':'draw'})}
 // ===== NETWORK =====
