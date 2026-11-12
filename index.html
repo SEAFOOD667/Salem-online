@@ -3,9 +3,9 @@
 :root{--bg:#241a12;--fg:#f3e6cc;--pn:#3a2b1f;--ac:#c0562f;--chat-w:clamp(200px,16vw,280px);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a130d;--pn:#2b2018}}
 :root[data-theme="dark"]{--bg:#1a130d;--pn:#2b2018}
-html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,"Sarabun",serif}
-button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;margin:3px}button:disabled{opacity:.4}
-input{padding:8px;border-radius:8px;border:1px solid #8a6a40;background:#150f0a;color:var(--fg);font:inherit}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,"Sarabun",serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;margin:3px;min-height:40px}button:disabled{opacity:.4}
+input{padding:8px;border-radius:8px;border:1px solid #8a6a40;background:#150f0a;color:var(--fg);font:inherit;font-size:16px}
 .w{max-width:1100px;margin:auto;padding:8px}#app.w{width:calc(100% - 2 * var(--chat-w) - 24px);max-width:none;margin-left:calc(var(--chat-w) + 12px);margin-right:calc(var(--chat-w) + 12px);padding:8px}.pn{background:var(--pn);border-radius:12px;padding:10px;margin:8px 0}
 #tbl{position:relative;height:min(78vh,640px);background:radial-gradient(ellipse at center,#5a3a22,#2e1f14 70%);border-radius:24px;border:4px solid #6b4a2a}
 .seat{position:absolute;transform:translate(-50%,-50%);background:#0007;border-radius:10px;padding:3px;text-align:center;font-size:11px;width:max-content;max-width:30%}
@@ -23,7 +23,40 @@ input{padding:8px;border-radius:8px;border:1px solid #8a6a40;background:#150f0a;
 .chat-locked{margin:auto;text-align:center;opacity:.75;padding:16px}
 .deck-click{cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;border-radius:12px;padding:4px 10px;transition:transform .15s,filter .15s}
 .deck-click:hover{transform:scale(1.07);filter:brightness(1.2)}.deck-click:focus-visible{outline:3px solid #ffd35a}.deck-click.disabled{cursor:not-allowed;opacity:.65}
-@media(max-width:900px){:root{--chat-w:0px}#app.w{width:100%;margin:0;padding:6px}#chat{top:auto;height:34vh;grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:4px}#chat-witch{grid-column:1}#chat-town{grid-column:2}.chat-side{padding:5px;font-size:11px}.chat-head{font-size:14px;padding:3px}.chat-compose button{padding:6px}}
+#chat-fab,#chat-close,#chat-backdrop{display:none}
+@media(max-width:900px){
+:root{--chat-w:0px}
+#app.w{width:100%;margin:0;padding:4px 4px 56px;padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+#tbl{height:min(52vh,420px);border-radius:16px;border-width:3px}
+.seat{font-size:10px;padding:2px;max-width:34%}
+.pn{padding:8px;margin:4px 0;border-radius:10px}
+.hand{gap:6px;justify-content:center}
+.hand svg{width:64px !important}
+.ov{padding:8px;align-items:flex-end}
+.ov>div{max-width:100%;width:100%;max-height:88vh;border-radius:16px 16px 0 0;padding:16px 12px calc(16px + env(safe-area-inset-bottom,0px))}
+button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
+.deck-click{padding:8px 14px}
+#chat{position:fixed;top:auto;left:0;right:0;bottom:0;height:min(48vh,380px);max-height:55vh;grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:0;z-index:220;transform:translateY(110%);transition:transform .25s ease;pointer-events:none;padding-bottom:env(safe-area-inset-bottom,0px);border-top:2px solid #6b4a2a;box-shadow:0 -8px 28px #000a}
+#chat.chat-open{transform:translateY(0);pointer-events:auto}
+#chat-witch{grid-column:1;border-left:0;border-right:1px solid #6b4a2a}
+#chat-town{grid-column:2;border-right:0}
+.chat-side{padding:6px;font-size:12px;border-radius:0;border-width:0;height:100%}
+.chat-head{font-size:14px;padding:4px;margin-bottom:4px}
+.chat-compose{margin-top:4px}
+.chat-compose button{min-height:40px;padding:8px 12px}
+.chat-messages{padding:6px}
+#chat-fab{display:flex;position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:230;width:52px;height:52px;border-radius:50%;background:var(--ac);color:#fff;border:0;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px #0008;cursor:pointer;padding:0;margin:0}
+#chat-fab.hidden{display:none}
+#chat-close{display:block;position:absolute;top:6px;right:8px;z-index:5;background:#0008;border:0;color:#fff;border-radius:8px;padding:4px 10px;font-size:13px;min-height:32px;cursor:pointer}
+#chat-backdrop{display:none;position:fixed;inset:0;background:#0007;z-index:210}
+#chat-backdrop.show{display:block}
+}
+@media(max-width:480px){
+#tbl{height:min(46vh,360px)}
+.seat{font-size:9px;max-width:36%}
+.hand svg{width:58px !important}
+.pn{font-size:13px}
+}
 </style></head><body><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -262,18 +295,40 @@ if(o.ph!==S.ph&&!RM)document.querySelectorAll('.ov>div').forEach(d=>d.animate([{
 if(o.turn!==S.turn&&S.ph==='play')bump(seatEl(S.players[S.turn].id),[{transform:TS+' scale(1)'},{transform:TS+' scale(1.14)'},{transform:TS+' scale(1)'}])}finally{prevS=S?JSON.parse(JSON.stringify(S)):null}}
 const r0=render;render=function(){try{chatRender()}catch(e){console.error(e)}if(!S||S.closed){prevS=null;return r0()}r0();try{anim()}catch(e){console.error(e)}try{annCheck()}catch(e){console.error(e)}A.insertAdjacentHTML('afterbegin','<div style="text-align:right">'+(S.ph!=='lobby'?'<button onclick="abil()" style="background:#4a3a6b;position:relative;z-index:50">📜 ความสามารถตัวละคร</button>':'')+'<button onclick="leave()" style="background:#6b3a2a;position:relative;z-index:50">🚪 ออกจากเกม</button></div>');if(U.lv)A.insertAdjacentHTML('beforeend',`<div class="ov" style="z-index:99"><div><h3>ออกจากเกม?</h3><p>${isHost?'คุณเป็นหัวหน้าห้อง ถ้าออก ห้องจะถูกปิดสำหรับทุกคน':'ถ้าเกมเริ่มแล้ว บอทจะเล่นแทนคุณ'}</p><button onclick="lvYes()">ออกเลย</button><button onclick="lvNo()" style="background:#555">ยกเลิก</button></div></div>`)};
 let CHAT=[],chOpen=0,chTab='all',chSeen={all:0,witch:0},chKey='';
+function isMobile(){return window.matchMedia('(max-width:900px)').matches}
+function ensureChatChrome(){
+ if(!document.getElementById('chat-fab')){
+  const fab=document.createElement('button');fab.id='chat-fab';fab.type='button';fab.title='แชท';fab.textContent='💬';
+  fab.onclick=()=>toggleChat(true);document.body.appendChild(fab);
+ }
+ if(!document.getElementById('chat-backdrop')){
+  const bd=document.createElement('div');bd.id='chat-backdrop';bd.onclick=()=>toggleChat(false);document.body.appendChild(bd);
+ }
+}
+window.toggleChat=(open)=>{
+ const e=document.getElementById('chat'),bd=document.getElementById('chat-backdrop'),fab=document.getElementById('chat-fab');
+ if(!e)return;
+ if(typeof open!=='boolean')open=!e.classList.contains('chat-open');
+ if(!isMobile()){e.classList.remove('chat-open');if(bd)bd.classList.remove('show');if(fab)fab.classList.add('hidden');return}
+ if(open){e.classList.add('chat-open');if(bd)bd.classList.add('show');if(fab)fab.classList.add('hidden')}
+ else{e.classList.remove('chat-open');if(bd)bd.classList.remove('show');if(fab)fab.classList.remove('hidden')}
+}
 function chatEl(){
  let e=document.getElementById('chat');if(e)return e;
  e=document.createElement('div');e.id='chat';
  e.innerHTML=`
+ <button type="button" id="chat-close" onclick="toggleChat(false)">ปิดแชท</button>
  <section class="chat-side" id="chat-witch"><div class="chat-head">🧙 แม่มด</div><div class="chat-messages" id="chm-witch"></div><div class="chat-compose" id="chc-witch"><input id="chi-witch" maxlength="200" placeholder="คุยเฉพาะแม่มด…" onkeydown="if(event.key==='Enter')chSend('witch')"><button onclick="chSend('witch')">ส่ง</button></div></section>
  <section class="chat-side" id="chat-town"><div class="chat-head">🏘 ชาวบ้าน</div><div class="chat-messages" id="chm-all"></div><div class="chat-compose"><input id="chi-all" maxlength="200" placeholder="ส่งข้อความถึงทุกคน…" onkeydown="if(event.key==='Enter')chSend('all')"><button onclick="chSend('all')">ส่ง</button></div></section>`;
- document.body.appendChild(e);return e
+ document.body.appendChild(e);ensureChatChrome();return e
 }
 window.chSend=(channel='all')=>{const i=document.getElementById(channel==='witch'?'chi-witch':'chi-all'),t=i?.value.trim(),p=me();if(!t||!db||!code)return;if(channel==='witch'&&!(p&&hasW(p)))return;const ts=Date.now(),m={ts,from:uid,name:p?p.name:myName,ch:channel,txt:t.slice(0,200)};CHAT.push(m);i.value='';chKey='';chatRender();db.doc(`rooms/${code}/chat/${uid}_${ts}`).set(m).catch(()=>{})};
 function chatRender(){
- const ex=document.getElementById('chat');if(!S||S.closed){if(ex)ex.style.display='none';return}
- const e=chatEl();e.style.display='grid';const p=me(),wi=!!(p&&hasW(p)),witch=document.getElementById('chat-witch');
+ const ex=document.getElementById('chat');if(!S||S.closed){if(ex)ex.style.display='none';const fab=document.getElementById('chat-fab'),bd=document.getElementById('chat-backdrop');if(fab)fab.classList.add('hidden');if(bd)bd.classList.remove('show');return}
+ ensureChatChrome();const e=chatEl();e.style.display='grid';
+ if(isMobile()){const fab=document.getElementById('chat-fab');if(fab&&!e.classList.contains('chat-open'))fab.classList.remove('hidden')}
+ else{e.classList.remove('chat-open');const fab=document.getElementById('chat-fab'),bd=document.getElementById('chat-backdrop');if(fab)fab.classList.add('hidden');if(bd)bd.classList.remove('show')}
+ const p=me(),wi=!!(p&&hasW(p)),witch=document.getElementById('chat-witch');
  if(!wi){witch.innerHTML='<div class="chat-head">🧙 แม่มด</div><div class="chat-locked">🔒 ห้องนี้สำหรับแม่มดเท่านั้น</div>'}
  else if(!document.getElementById('chi-witch')){witch.innerHTML='<div class="chat-head">🧙 แม่มด</div><div class="chat-messages" id="chm-witch"></div><div class="chat-compose"><input id="chi-witch" maxlength="200" placeholder="คุยเฉพาะแม่มด…" onkeydown="if(event.key===\'Enter\')chSend(\'witch\')"><button onclick="chSend(\'witch\')">ส่ง</button></div>'}
  const draw=(id,list)=>{const box=document.getElementById(id);if(!box)return;box.innerHTML=list.map(x=>`<div style="margin:3px 0"><b style="color:${x.ch==='witch'?'#e88':'#fc6'}">${esc(x.name)}:</b> ${esc(x.txt)}</div>`).join('')||'<small style="opacity:.6">ยังไม่มีข้อความ</small>';box.scrollTop=box.scrollHeight};
