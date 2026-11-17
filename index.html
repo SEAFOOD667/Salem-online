@@ -3,11 +3,11 @@
 :root{--bg:#241a12;--fg:#f3e6cc;--pn:#3a2b1f;--ac:#c0562f;--chat-w:clamp(200px,16vw,280px);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a130d;--pn:#2b2018}}
 :root[data-theme="dark"]{--bg:#1a130d;--pn:#2b2018}
-html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,"Sarabun",serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,"Sarabun",serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow-x:hidden}
 button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;margin:3px;min-height:40px}button:disabled{opacity:.4}
 input{padding:8px;border-radius:8px;border:1px solid #8a6a40;background:#150f0a;color:var(--fg);font:inherit;font-size:16px}
 .w{max-width:1100px;margin:auto;padding:8px}#app.w{width:calc(100% - 2 * var(--chat-w) - 24px);max-width:none;margin-left:calc(var(--chat-w) + 12px);margin-right:calc(var(--chat-w) + 12px);padding:8px}.pn{background:var(--pn);border-radius:12px;padding:10px;margin:8px 0}
-#tbl{position:relative;height:min(78vh,640px);background:radial-gradient(ellipse at center,#5a3a22,#2e1f14 70%);border-radius:24px;border:4px solid #6b4a2a}
+#tbl{position:relative;height:min(62vh,520px);background:radial-gradient(ellipse at center,#5a3a22,#2e1f14 70%);border-radius:24px;border:4px solid #6b4a2a}
 .seat{position:absolute;transform:translate(-50%,-50%);background:#0007;border-radius:10px;padding:3px;text-align:center;font-size:11px;width:max-content;max-width:30%}
 .seat.cur{outline:3px solid #ffd35a}.seat.dead{opacity:.45;filter:grayscale(1)}.seat.tg{outline:3px dashed #7fe0ff;cursor:pointer}
 .row{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}.ctr{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);text-align:center}
@@ -55,7 +55,7 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .top-bar{display:flex;justify-content:flex-end;gap:6px;padding:4px 2px;position:relative;z-index:50}
 .top-bar button{min-height:36px;padding:6px 12px;font-size:13px;margin:0}
 .btn-abil{background:#4a3a6b !important}.btn-leave{background:#6b3a2a !important}
-.status-bar{text-align:center;font-size:12px;padding:6px 10px;margin:4px 0;background:var(--pn);border-radius:10px;opacity:.95}
+.status-bar{text-align:center;font-size:11px;padding:4px 8px;margin:2px 0;background:var(--pn);border-radius:8px;opacity:.95}
 .ring-label{position:absolute;left:50%;top:72%;transform:translateX(-50%);font-size:11px;color:#ffd35a;opacity:.8;white-space:nowrap;pointer-events:none}
 .seat{background:#000a;border:1px solid #6b4a2a55;padding:5px 6px;min-width:72px}
 .seat-name{font-weight:bold;font-size:11px;line-height:1.25;margin-bottom:1px}
@@ -63,7 +63,7 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .seat-name .you-tag{background:#c0562f;color:#fff;border-radius:4px;padding:0 4px;font-size:9px}
 .acc-n{color:#ffb36b}
 .seat-portrait svg{width:40px}
-.player-panel{padding:10px}
+.player-panel{padding:6px 8px;margin:4px 0}
 .pp-top{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
 .pp-char{text-align:center;min-width:100px}
 .pp-role{font-size:13px;margin-top:2px}
@@ -74,7 +74,7 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .pp-tryal{text-align:center;font-size:10px;display:inline-flex;flex-direction:column;align-items:center}
 .pp-tryal small{margin-top:1px}
 .t-open{color:#f88}.t-closed{color:#8f8}
-.pp-actions{margin-top:8px;font-size:14px;min-height:28px}
+.pp-actions{margin-top:4px;font-size:13px;min-height:24px}
 .pp-log{font-size:11px;opacity:.8;margin-top:6px;line-height:1.4;max-height:4.5em;overflow:hidden}
 @media(max-width:900px){
 .top-bar{padding:2px}
@@ -85,7 +85,7 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .seat-portrait{display:none}
 .seat-name{font-size:10px}
 .seat-meta{font-size:9px}
-#tbl{height:min(50vh,400px)}
+#tbl{height:min(48vh,380px)}
 .player-panel{padding:8px}
 .pp-top{gap:8px}
 .pp-char svg{width:72px !important}
@@ -104,10 +104,11 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .pp-tryal svg{width:36px !important}
 }
 
-.action-strip{display:flex;flex-wrap:wrap;gap:10px;padding:6px 8px;margin:4px 0;background:var(--pn);border-radius:10px;font-size:11px;align-items:center}
-.as-item{display:flex;align-items:center;gap:6px}
-.as-label{opacity:.85;white-space:nowrap}
-@media(max-width:900px){.action-strip{padding:4px 6px;gap:8px}.as-item svg{width:36px !important}}
+.action-strip{display:flex;flex-wrap:wrap;gap:6px;padding:3px 6px;margin:0;background:var(--pn);border-radius:8px;font-size:10px;align-items:center;line-height:1.2}
+.as-item{display:flex;align-items:center;gap:4px}
+.as-item svg{width:28px !important;height:auto}
+.as-label{opacity:.85;white-space:nowrap;font-size:10px}
+@media(max-width:900px){.action-strip{padding:2px 4px;gap:4px;font-size:9px}.as-item svg{width:24px !important}.as-label{font-size:9px}}
 
 .ov-sheet{display:flex;flex-direction:column;max-height:min(92vh,640px);width:100%;max-width:560px;background:var(--pn);border-radius:14px;overflow:hidden;text-align:center;box-sizing:border-box}
 .ov-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 14px 8px;overscroll-behavior:contain}
@@ -120,6 +121,17 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .ov-body{padding:12px 12px 6px;max-height:none}
 .ov-foot{padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px))}
 }
+
+.seat-mid{display:flex;gap:4px;align-items:flex-start;justify-content:center}
+.turn-big{font-size:clamp(18px,2.2vw,28px);font-weight:700;color:#ffd35a;text-shadow:0 2px 8px #000;padding:10px 14px;border:2px solid #ffd35a;border-radius:12px;background:#ffd35a1a;text-align:center;line-height:1.35}
+.btn-end{font-size:18px;padding:10px 26px}.turn-note{font-size:14px;opacity:.85}
+.deck-click:not(.disabled){filter:drop-shadow(0 0 14px #ffd35a)}
+.deck-msg{position:absolute;left:calc(50% + 66px);top:45%;transform:translateY(-50%);width:min(30%,300px);z-index:5;text-align:center}
+.deck-msg .turn-big{font-size:clamp(15px,1.5vw,22px);padding:8px 10px}.deck-msg .turn-note{margin-top:6px}
+@media (hover:hover) and (pointer:fine){.arr-btns,.only-touch{display:none}}
+[draggable="true"]{user-select:none;border-radius:8px;padding:2px}[draggable="true"]:hover{background:#ffffff14}
+.top-bar{display:flex!important;justify-content:space-between;align-items:center;gap:6px;padding:2px 0;min-height:0}
+.top-strip{flex:1;min-width:0}.top-strip .action-strip{margin:0;display:inline-flex}.top-btns{display:flex;gap:6px;flex-shrink:0}
 </style></head><body><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -168,8 +180,10 @@ S.disc.push(...p.hand,...p.front.filter(k=>k!=='cat'));p.hand=[];p.front=[];lg(S
 if(mm){const o=S.players.find(q=>q.alive&&q.front.includes('mat')&&q.ch!=='Mary Warren');if(o){lg(S,'💘 Matchmaker พาอีกคนตายตาม');die(S,o)}}}
 function check(S){let c=1;while(c){c=0;for(const p of S.players)if(p.alive&&(p.tryal.every(t=>t.rev)||p.tryal.some(t=>t.t==='W'&&t.rev))){die(S,p);c=1}}
 if(S.ph==='end'||S.ph==='lobby')return;const W=S.players.flatMap(p=>p.tryal).filter(t=>t.t==='W');
-if(W.every(t=>t.rev))fin2(S,'town');else if(al(S).every(hasW))fin2(S,'witch')}
-function fin2(S,w){S.ph='end';S.win=w;S.pend=null;S.night=null;lg(S,w==='town'?'🏆 ชาวบ้านชนะ!':'🏆 แม่มดครองเมือง!')}
+if(W.every(t=>t.rev))fin2(S,'town','เปิด Witch ครบทุกใบแล้ว');else if(al(S).every(hasW))fin2(S,'witch','ผู้เล่นที่เหลือเป็นแม่มดทั้งหมด');
+else if(al(S).length<=2){const k=al(S).length;if(al(S).some(hasW))fin2(S,'witch','เหลือผู้เล่น '+k+' คน และแม่มดยังรอดอยู่');else fin2(S,'town','เหลือผู้เล่น '+k+' คน และไม่มีแม่มดเหลือ')}}
+function fin2(S,w,why){S.ph='end';S.win=w;S.winWhy=why||'';S.pend=null;S.night=null;lg(S,(w==='town'?'🏆 ชาวบ้านชนะ!':'🏆 แม่มดครองเมือง!')+(why?' ('+why+')':''))}
+function toWsee(S){S.players.forEach(x=>x.wr=!hasW(x)||!!x.bot);S.ph='wsee';lg(S,'👁 แม่มดลืมตาดูหน้ากัน');if(S.players.every(x=>x.wr))toDawn(S)}
 function toDawn(S){S.wseen=S.players.filter(hasW).map(x=>x.id);S.ph='dawn';lg(S,'🌅 Dawn: แม่มดเลือกผู้รับแมวดำ')}
 function nextTurn(S,fromId){S.ending=false;S.mode=null;let i=S.players.findIndex(p=>p.id===fromId);for(let c=0;c<S.players.length*2;c++){i=(i+1)%S.players.length;const p=S.players[i];if(!p.alive)continue;const s=p.front.indexOf('sto');if(s>=0){p.front.splice(s,1);S.disc.push('sto');lg(S,`${p.name} ติด Stocks ข้ามตา`);continue}S.turn=i;return}}
 function fin(S){check(S);if(S.ph!=='play'||S.pend)return;const p=S.players[S.turn];if(!p.alive){nextTurn(S,p.id);return}if(!S.ending)return;if(p.alive&&p.hand.length>7){S.pend={t:'dis',by:p.id};return}nextTurn(S,p.id)}
@@ -193,11 +207,12 @@ function act(S,id,a){const p=P(S,id),me=S.players[S.turn];
 if(a.t==='join'){if(S.ph!=='lobby'||P(S,id)||S.players.length>=12)return;S.players.push({id,name:String(a.name||'ผู้เล่น').slice(0,14)});return}
 if(a.t==='bot'){if(S.ph==='lobby'&&id===S.host&&S.players.length<12){const n=S.players.filter(x=>x.bot).length+1;S.players.push({id:'bot'+Date.now()+n,name:'🤖บอท'+n,bot:1})}return}
 if(a.t==='rmbot'){if(S.ph==='lobby'&&id===S.host){const i=S.players.map((x,idx)=>x.bot?idx:-1).filter(x=>x>=0).pop();if(i!==undefined)S.players.splice(i,1)}return}
-if(a.t==='leave'){if(p&&S.ph==='lobby')S.players=S.players.filter(x=>x.id!==id);else if(p&&S.ph!=='end'){p.bot=1;p.left=1;p.ready=true;lg(S,`${p.name} ออกจากเกม (บอทเล่นแทน)`)}return}
+if(a.t==='leave'){if(p&&S.ph==='lobby')S.players=S.players.filter(x=>x.id!==id);else if(p&&S.ph!=='end'){p.bot=1;p.left=1;p.ready=true;p.ar=true;p.wr=true;lg(S,`${p.name} ออกจากเกม (บอทเล่นแทน)`);if(S.ph==='arr'&&S.players.every(x=>x.ar))toWsee(S);else if(S.ph==='wsee'&&S.players.every(x=>x.wr))toDawn(S)}return}
 if(a.t==='rematch'){if(S.ph==='end'&&id===S.host){const c=S.code,h=S.host,ak=S.ak,an=S.anns,keep=S.players.filter(x=>!x.left).map(x=>x.bot?{id:x.id,name:x.name,bot:1}:{id:x.id,name:x.name});for(const k of Object.keys(S))delete S[k];Object.assign(S,{ph:'lobby',host:h,code:c,players:keep,log:[],ak,anns:an});seen={};try{['act','joins','chat'].forEach(col=>db.collection(`rooms/${c}/${col}`).get().then(old=>{if(old.size){const batch=db.batch();old.docs.forEach(d=>batch.delete(d.ref));batch.commit()}}))}catch(e){}CHAT=[];chKey='';try{chatRender()}catch(e){}}return}
 if(a.t==='start'){if(S.ph==='lobby'&&id===S.host&&S.players.length>=4)startGame(S);return}
 if(!p)return;
-if(a.t==='ready'&&S.ph==='reveal'){p.ready=true;if(S.players.every(x=>x.ready)){S.players.forEach(x=>x.wr=!hasW(x)||!!x.bot);S.ph='wsee';lg(S,'👁 แม่มดลืมตาดูหน้ากัน');if(S.players.every(x=>x.wr))toDawn(S)}return}
+if(a.t==='ready'&&S.ph==='reveal'){p.ready=true;if(S.players.every(x=>x.ready)){S.players.forEach(x=>x.ar=!!x.bot);S.ph='arr';lg(S,'🃏 ทุกคนจัดลำดับไพ่ Tryal ของตัวเอง');if(S.players.every(x=>x.ar))toWsee(S)}return}
+if(a.t==='arrok'&&S.ph==='arr'){const o=a.o,n=p.tryal.length;if(Array.isArray(o)&&o.length===n&&new Set(o).size===n&&o.every(i=>Number.isInteger(i)&&i>=0&&i<n))p.tryal=o.map(i=>p.tryal[i]);p.ar=true;if(S.players.every(x=>x.ar))toWsee(S);return}
 if(a.t==='wready'&&S.ph==='wsee'&&hasW(p)){p.wr=true;if(S.players.every(x=>x.wr))toDawn(S);return}
 if(a.t==='cat'&&S.ph==='dawn'&&hasW(p)){const t=P(S,a.tg);if(!t)return;t.front.push('cat');S.cat=t.id;S.turn=S.players.indexOf(t);S.ph='play';lg(S,`🐈‍⬛ แมวดำตกอยู่กับ ${t.name} เขาเริ่มเกม`);return}
 if(a.t==='conf'&&S.ph==='night'&&p.alive&&!S.night.cf.includes(p.id)){const u=unrev(p);if(!u.includes(a.i))return;p.tryal[a.i].rev=true;S.night.cf.push(p.id);ann(S,{kind:'rev',who:p.id,name:p.name,i:a.i,t:p.tryal[a.i].t,why:'conf'});lg(S,`🙏 ${p.name} สารภาพ (เปิด Tryal 1 ใบ)`);check(S);return}
@@ -277,14 +292,17 @@ else{requestJoin(name);let tries=0;joinRetry=setInterval(()=>{if(!S||S.ph!=='lob
 unsubs.push(db.collection(`rooms/${code}/chat`).onSnapshot(sn=>{CHAT=sn.docs.map(d=>d.data()).sort((a,b)=>a.ts-b.ts);chatRender()}));render()};
 setInterval(()=>{if(!S)return;if(isHost){
 if(S.ph==='lobby'){db.collection(`rooms/${code}/joins`).get().then(snap=>{if(absorbJoins(snap.docs)){publish();render()}}).catch(()=>{})}
-if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}if(S.ph==='reveal'||S.ph==='wsee'||S.ph==='dawn'){/* อย่า rebuild overlay ทุกวินาที */const cd=document.getElementById('cd');const T=S.night||S.cons;if(cd&&T)cd.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}else render()}else{const e=document.getElementById('cd');const T=S.night||S.cons;if(e&&T)e.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}},1100);
+if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}if(S.ph==='reveal'||S.ph==='arr'||S.ph==='wsee'||S.ph==='dawn'){/* อย่า rebuild overlay ทุกวินาที */const cd=document.getElementById('cd');const T=S.night||S.cons;if(cd&&T)cd.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}else render()}else{const e=document.getElementById('cd');const T=S.night||S.cons;if(e&&T)e.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}},1100);
 // ===== UI =====
 const me=()=>S&&P(S,uid);
-let NOTE='';function toast(m){NOTE=m;if(!S)home()}
+let topStrip='',NOTE='';function toast(m){NOTE=m;if(!S)home()}
 function home(){A.innerHTML=`<div class="pn" style="text-align:center">${NOTE?`<p style="color:#ffb36b">${esc(NOTE)}</p>`:''}<h1>🕯 SALEM 1692</h1><p>เกมล่าแม่มด Multiplayer ข้ามเครื่อง (4–12 คน) — เปิดลิงก์เดียวกันคนละเครื่อง</p><input id="nm" placeholder="ชื่อของคุณ" maxlength="14" value="${esc(myName)}"><br><br><button onclick="mk()">สร้างห้องใหม่</button><br><input id="cc" placeholder="รหัสห้อง" size="6" maxlength="4" style="text-transform:uppercase"><button onclick="jn()">เข้าร่วมห้อง</button></div>`}
 window.mk=()=>{const n=document.getElementById('nm').value.trim()||'ผู้เล่น';enter(Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.random()*24|0]).join(''),1,n)};
 window.jn=()=>{const n=document.getElementById('nm').value.trim()||'ผู้เล่น',c=document.getElementById('cc').value.trim();if(c)enter(c,0,n)};
-window.sd=a=>{send(a)};window.cancel=()=>{U.c=null;U.tg=null;render()};
+window.sd=a=>{send(a)};
+window.arrDS=i=>{U.drag=i};window.arrDrop=j=>{const i=U.drag;if(i==null||i===j||!U.arr)return;const x=U.arr.splice(i,1)[0];U.arr.splice(j,0,x);U.drag=null;render()};
+window.arrMv=(i,d)=>{const a=U.arr,j=i+d;if(!a||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()};
+window.arrOk=()=>{send({t:'arrok',o:U.arr});U.arrSent=1;render()};window.cancel=()=>{U.c=null;U.tg=null;render()};
 window.deckClick=()=>{const p=me(),cur=S&&S.players[S.turn];if(!S||S.ph!=='play'||!p||!p.alive||!cur||cur.id!==uid||S.pend||S.mode)return;send({t:'draw'})};
 const IMPL=['Cotton Mather','George Burroughs','Sarah Good','Mary Warren','John Proctor'];
 window.abil=()=>{if(!S)return;const d=document.createElement('div');d.className='ov';d.style.zIndex=250;d.innerHTML=`<div style="text-align:left;max-width:520px"><h3 style="text-align:center">📜 ความสามารถตัวละครของทุกคน</h3>${S.players.map(x=>TH[x.ch]?`<div style="margin:8px 0;padding:6px;border-radius:8px;background:#0005${x.alive?'':';opacity:.5'}"><b>${esc(x.name)}${x.id===uid?' (คุณ)':''}</b> — ${esc(TH[x.ch][0])} (${esc(TH[x.ch][1])})${x.alive?'':' ☠'}<br>${esc(TH[x.ch][2])}${IMPL.includes(x.ch)?' <span style="color:#8f8">✔ ใช้งานในเกม</span>':' <small style="opacity:.7">(ยังไม่มีผลในเกม)</small>'}</div>`:'').join('')}<div style="text-align:center"><button onclick="this.closest('.ov').remove()">ปิด</button></div></div>`;document.body.appendChild(d)};
@@ -308,17 +326,17 @@ const acc=redSum(p),need=p.ch==='George Burroughs'?8:7;
 return `<div data-id="${p.id}" class="seat ${cur?'cur':''} ${p.alive?'':'dead'} ${tg?'tg':''} ${mine?'seat-me':''}" style="left:${x}%;top:${y}%" ${tg?`onclick="sc('${p.id}')"`:''}>
 <div class="seat-name">${esc(p.name)}${mine?' <span class="you-tag">คุณ</span>':''}${p.id===S.cat?' 🐈‍⬛':''}${p.alive?'':' ☠'}</div>
 <div class="seat-meta">${TH[p.ch]?esc(TH[p.ch][0]):''} · ✋${p.hand.length}${acc?` · <span class="acc-n">⚖${acc}/${need}</span>`:''}</div>
-${mine?'':`<div class="row seat-portrait">${zs('h',p.ch,chc(p.ch,40))}</div>`}
-<div class="row seat-tryals">${p.tryal.map(t=>t.rev||end||mine?zs('t',t.t,tf(t.t,tw,mine&&t.rev?'rv':'')):tb(tw)).join('')}</div>
+<div class="seat-mid"><span class="seat-portrait">${zs('h',p.ch,chc(p.ch,mine?46:40))}</span><div class="row seat-tryals">${p.tryal.map(t=>t.rev||end||mine?zs('t',t.t,tf(t.t,tw,mine&&t.rev?'rv':'')):tb(tw)).join('')}</div></div>
 <div class="row seat-front">${p.front.map(k=>zs('c',k,card(k,26))).join('')}</div>
 </div>`}
 function render(){if(!S){home();return}const p=me();
-if(S.ph==='lobby'){U.endClosed=0;A.innerHTML=`<div class="pn" style="text-align:center"><h2>ห้อง ${S.code}</h2><p>ให้เพื่อนเปิดลิงก์นี้แล้วใส่รหัสห้อง ${S.code} (${S.players.length}/12)</p><p>🧙 ใบแม่มดที่จะใช้: ${Math.max(1,Math.round(S.players.length*0.25))} ใบ (คำนวณสมดุลตามจำนวนผู้เล่น)</p>${S.players.map(x=>`<div>${esc(x.name)}${x.id===S.host?' 👑':''}</div>`).join('')}<br>${isHost?`<button onclick="sd({t:'bot'})">+ เพิ่มบอท</button>${S.players.some(x=>x.bot)?`<button onclick="sd({t:'rmbot'})" style="background:#6b3a2a">− ลบบอท</button>`:''}<button ${S.players.length<4?'disabled':''} onclick="sd({t:'start'})">เริ่มเกม (ต้อง 4+ คน)</button>`:'รอหัวหน้าห้องเริ่มเกม…'}</div>`;return}
+if(S.ph==='lobby'){U.endClosed=0;U.arrSent=0;U.arr=null;A.innerHTML=`<div class="pn" style="text-align:center"><h2>ห้อง ${S.code}</h2><p>ให้เพื่อนเปิดลิงก์นี้แล้วใส่รหัสห้อง ${S.code} (${S.players.length}/12)</p><p>🧙 ใบแม่มดที่จะใช้: ${Math.max(1,Math.round(S.players.length*0.25))} ใบ (คำนวณสมดุลตามจำนวนผู้เล่น)</p>${S.players.map(x=>`<div>${esc(x.name)}${x.id===S.host?' 👑':''}</div>`).join('')}<br>${isHost?`<button onclick="sd({t:'bot'})">+ เพิ่มบอท</button>${S.players.some(x=>x.bot)?`<button onclick="sd({t:'rmbot'})" style="background:#6b3a2a">− ลบบอท</button>`:''}<button ${S.players.length<4?'disabled':''} onclick="sd({t:'start'})">เริ่มเกม (ต้อง 4+ คน)</button>`:'รอหัวหน้าห้องเริ่มเกม…'}</div>`;return}
 if(!p){A.innerHTML='<div class="pn">เกมเริ่มไปแล้ว</div>';return}
 const m=S.players.indexOf(p),n=S.players.length,cur=S.players[S.turn],my=S.ph==='play'&&cur===p&&!S.pend;let ov='',msg='';
 const role=hasW(p)?'🧙 แม่มด (Witch)':'⛪ ชาวบ้าน',con=isC(p)?' + Constable ⚖':'';
 if(S.ph==='reveal'&&!p.ready)ov=`<div class="ov"><div class="ov-sheet"><div class="ov-body"><h2>ตัวละครและบทบาทลับของคุณ</h2>${chc(p.ch,150)}<p><b>${esc(TH[p.ch][0])}</b> (${esc(TH[p.ch][1])})<br>${esc(TH[p.ch][2])}${IMPL.includes(p.ch)?'':'<br><small style="opacity:.7">(ความสามารถนี้ยังไม่มีผลในเกม)</small>'}</p><h2>${role}${con}</h2><p>🧙 แม่มด <b>${S.wc}</b> ใบ จาก Tryal ${S.tc} ใบ</p><p>Tryal ของคุณ:</p><div class="row">${p.tryal.map(t=>tf(t.t,64)).join('')}</div><p class="ov-hint">${hasW(p)?'คุณอยู่ฝั่งแม่มด — เฟสถัดไปจะเห็นแม่มดคนอื่น':'คุณอยู่ฝั่งชาวบ้าน — หา Witch ให้เจอทั้งหมด'}</p></div><div class="ov-foot"><button onclick="sd({t:'ready'})">รับทราบ ✔</button></div></div></div>`;
 else if(S.ph==='reveal')msg='รอผู้เล่นอื่นดูบทบาท…';
+if(S.ph==='arr'){if(!p.ar&&!U.arrSent){if(!U.arr||U.arr.length!==p.tryal.length)U.arr=p.tryal.map((_,i)=>i);ov=`<div class="ov"><div class="ov-sheet"><div class="ov-body"><h2>🃏 จัดลำดับไพ่ Tryal ของคุณ</h2><p>ลากการ์ดไปวางสลับตำแหน่งตามที่ต้องการ <span class="only-touch">(บนมือถือกดปุ่ม ◀ ▶ ใต้การ์ด)</span><br><small>คนอื่นจะเห็นเป็นไพ่คว่ำตามลำดับนี้ และเลือกหยิบด้วยตำแหน่ง</small></p><div class="row" style="gap:10px;margin:10px 0">${U.arr.map((idx,pos)=>`<div draggable="true" ondragstart="arrDS(${pos})" ondragend="U.drag=null" ondragenter="this.style.outline='3px dashed #ffd35a'" ondragleave="this.style.outline=''" ondragover="event.preventDefault()" ondrop="arrDrop(${pos})" style="text-align:center;cursor:grab">${tf(p.tryal[idx].t,78)}<br><small>ใบที่ ${pos+1}</small><div class="arr-btns"><button onclick="arrMv(${pos},-1)" ${pos===0?'disabled':''}>◀</button><button onclick="arrMv(${pos},1)" ${pos===U.arr.length-1?'disabled':''}>▶</button></div></div>`).join('')}</div><button onclick="arrOk()">ยืนยันลำดับ ✔</button></div></div></div>`}else ov=`<div class="ov"><div class="ov-sheet"><div class="ov-body"><h2>🃏 จัดลำดับไพ่แล้ว</h2><p>รอผู้เล่นคนอื่นจัดไพ่… (${S.players.filter(x=>x.ar).length}/${S.players.length})</p></div></div></div>`}
 if(S.ph==='wsee'){const ws=S.players.filter(hasW);ov=`<div class="ov" style="background:#000e"><div class="ov-sheet"><div class="ov-body"><h2>👁 แม่มดลืมตา</h2>${hasW(p)?`<p>แม่มดทั้งหมดในเกมตอนนี้:</p>${ws.map(w=>`<div style="font-size:18px">🧙 ${esc(w.name)}${w===p?' (คุณ)':''}</div>`).join('')}`:'<p>แม่มดกำลังลืมตาดูกันเอง…<br>(หลับตาไว้ ห้ามแอบดู)</p>'}</div>${hasW(p)?`<div class="ov-foot"><button ${p.wr?'disabled':''} onclick="sd({t:'wready'})">${p.wr?'รอแม่มดคนอื่น…':'รับทราบ ✔'}</button></div>`:''}</div></div>`}
 if(S.ph==='morn'){const rs=S.morn.res;ov=`<div class="ov" style="background:radial-gradient(circle,#4a3a1ae0,#000d)"><div><h2>🌅 รุ่งเช้า</h2><p style="font-size:18px">${rs.k==='dead'?`💀 ${esc(rs.name)} ถูกฆ่าตายเมื่อคืนนี้`:'เมื่อคืนไม่มีใครเสียชีวิต'}</p><p>เกมจะดำเนินต่อในไม่กี่วินาที…</p></div></div>`}
 if(S.ph==='dawn'){const ws=S.players.filter(hasW);ov=`<div class="ov"><div><h2>🌅 Dawn</h2>${hasW(p)?`<p>แม่มดในเกม: ${ws.map(w=>esc(w.name)).join(', ')}</p><p>เลือกผู้รับ Black Cat (เขาจะเป็นคนเริ่มเล่น):</p>${S.players.map(x=>`<button onclick="sd({t:'cat',tg:'${x.id}'})">${esc(x.name)}</button>`).join('')}`:'<p>แม่มดกำลังเลือกผู้รับแมวดำ… (หลับตาไว้)</p>'}</div></div>`}
@@ -326,28 +344,27 @@ if(S.ph==='night'&&p.alive){const c=S.night.cf.includes(p.id),ot=al(S);ov=`<div 
 if(S.ph==='cons'){const c=S.cons,d=p.alive?donor(S,p):null,by=P(S,c.by),done=c.picks[uid]!==undefined,can=d&&d!==p&&unrev(d).length;ov=`<div class="ov" style="background:radial-gradient(circle,#3a0c0cf2,#000 80%)"><div style="background:#140909;border:2px solid #8a2a2a;box-shadow:0 0 40px #8a2a2a"><h2>🔮 สมคบคิด!</h2><div>${card('con',110)}</div><p>${esc(by.name)} จั่วได้ Conspiracy<br>ทุกคนต้องหยิบ Tryal 1 ใบจากผู้เล่นทางซ้าย (เหลือ <span id="cd">${Math.max(0,Math.ceil((c.end-Date.now())/1000))}</span> วินาที)</p>${!p.alive?'<p>คุณตายแล้ว — รอดูผล</p>':done?`<p>✔ คุณเลือกแล้ว รอคนอื่น (${Object.keys(c.picks).length}/${al(S).length})</p>`:can?`<p>เลือก Tryal ของ <b>${esc(d.name)}</b> (ผู้เล่นทางซ้าย) 1 ใบ — เลือกแบบไม่เห็นหน้าไพ่</p><div class="row">${d.tryal.map((t,i)=>t.rev?tf(t.t,60):`<span onclick="sd({t:'cpick',i:${i}})">${tb(60).replace('<svg','<svg class=cd')}</span>`).join('')}</div>`:'<p>ไม่มีไพ่ให้หยิบ รอคนอื่น…</p>'}</div></div>`}
 if(S.ph==='night'&&!p.alive)msg='🌙 กลางคืน…';
 const pe=S.pend;if(pe&&pe.by===uid&&S.ph==='play'){if(pe.t==='rev'){const t=P(S,pe.tgt);ov=`<div class="ov"><div><h3>เลือก Tryal ของ ${esc(t.name)} ที่จะเปิด</h3><div class="row">${t.tryal.map((x,i)=>x.rev?tf(x.t,60):`<span onclick="sd({t:'rev',i:${i}})">${tb(60).replace('<svg','<svg class=cd')}</span>`).join('')}</div></div></div>`}else ov=`<div class="ov"><div><h3>ไพ่เกิน 7 ใบ เลือกใบที่จะทิ้ง</h3><div class="hand">${p.hand.map((k,i)=>`<span onclick="sd({t:'dis',i:${i}})">${card(k,70)}</span>`).join('')}</div></div></div>`}
-if(S.ph==='end'&&!U.endClosed)ov=`<div class="ov"><div><h1>${S.win==='town'?'🏆 ชาวบ้านชนะ!':'🏆 แม่มดชนะ!'}</h1><p>${S.win==='town'?'เปิด Witch ครบทุกใบแล้ว':'แม่มดครองเมือง'}</p><p>แม่มด: ${S.players.filter(x=>x.w||x.tryal.some(t=>t.t==='W')).map(x=>esc(x.name)).join(', ')}</p>${isHost?'<button onclick="sd({t:\'rematch\'})">🔄 กลับล็อบบี้ / เล่นอีกรอบ</button>':'<p>รอหัวหน้าห้องกดเล่นอีกรอบ…</p>'}<button onclick="U.endClosed=1;render()" style="background:#555">ดูโต๊ะต่อ</button><button onclick="leave()" style="background:#6b3a2a">ออกจากห้อง</button></div></div>`;
+if(S.ph==='end'&&!U.endClosed)ov=`<div class="ov"><div><h1>${S.win==='town'?'🏆 ชาวบ้านชนะ!':'🏆 แม่มดชนะ!'}</h1><p>${esc(S.winWhy||(S.win==='town'?'เปิด Witch ครบทุกใบแล้ว':'แม่มดครองเมือง'))}</p><p>แม่มด: ${S.players.filter(x=>x.w||x.tryal.some(t=>t.t==='W')).map(x=>esc(x.name)).join(', ')}</p>${isHost?'<button onclick="sd({t:\'rematch\'})">🔄 กลับล็อบบี้ / เล่นอีกรอบ</button>':'<p>รอหัวหน้าห้องกดเล่นอีกรอบ…</p>'}<button onclick="U.endClosed=1;render()" style="background:#555">ดูโต๊ะต่อ</button><button onclick="leave()" style="background:#6b3a2a">ออกจากห้อง</button></div></div>`;
 
 if(my)msg=U.c===null?''+(S.mode==='play'?'เล่นการ์ดต่อได้ หรือกด จบตา (จั่วไม่ได้แล้วในตานี้)':'ตาของคุณ: เลือก จั่ว 2 ใบ (แล้วเล่นการ์ดไม่ได้) หรือ คลิกการ์ดในมือเพื่อเล่น (แล้วจั่วไม่ได้)')+'':(need(p.hand[U.c])===2?(U.tg?'เลือกผู้เล่นปลายทาง':'เลือกผู้เล่นต้นทาง'):'เลือกผู้เล่นเป้าหมาย')+' <button onclick="cancel()">ยกเลิก</button>';
 else if(S.ph==='play')msg=pe?'รอ '+esc(P(S,pe.by).name)+' เลือก…':'ตาของ '+esc(cur.name);
 if(!ov&&S.cr&&S.cr.k!==U.crSeen&&S.cr.map[uid]&&S.ph!=='cons'){const m=S.cr.map[uid],nm={W:'แม่มด',N:'ไม่ใช่แม่มด',C:'ตำรวจเมือง'};ov=`<div class="ov" style="background:radial-gradient(circle,#3a0c0cf2,#000 80%)"><div style="background:#140909;border:2px solid #8a2a2a"><h2>🔁 ผลของสมคบคิด (เห็นเฉพาะคุณ)</h2><div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap"><div><b style="color:#7fe0ff">⬅ คุณได้ไพ่</b><br>${m.got?tf(m.got.t,90)+`<br>${nm[m.got.t]}<br><small>จาก ${esc(m.got.from)}</small>`:'<br>ไม่ได้ไพ่ใหม่'}</div><div><b style="color:#ff9a7f">➡ คุณเสียไพ่</b><br>${m.lost?tf(m.lost.t,90)+`<br>${nm[m.lost.t]}<br><small>ให้ ${esc(m.lost.to)}</small>`:'<br>ไม่เสียไพ่'}</div></div><p>(เคยเป็นแม่มดแล้วเป็นตลอดไป)<br>ตอนนี้คุณอยู่ฝั่ง: <b>${hasW(p)?'🧙 แม่มด':'⛪ ชาวบ้าน'}${isC(p)?' + ตำรวจเมือง':''}</b></p><div class="row">${p.tryal.map(t=>tf(t.t,46,t.rev?'rv':'')).join('')}</div><br><button onclick="U.crSeen=S.cr.k;render()">รับทราบ ✔</button></div></div>`}
+let actHtml=msg,deckMsg='';if(my&&U.c===null){actHtml='';deckMsg=S.mode==='play'?'<button class="btn-end" onclick="sd({t:\'end\'})">จบตา</button><div class="turn-note">เล่นการ์ดต่อได้ หรือกด จบตา (ตานี้จั่วไม่ได้แล้ว)</div>':(S.mode?'':'<div class="turn-big">ตาของคุณแล้ว! กดจั่วสองใบได้ที่กองการ์ด หรือเล่นการ์ดของคุณแล้วกด "จบตา"</div>')}
 const revW=S.players.flatMap(x=>x.tryal).filter(t=>t.t==='W'&&t.rev).length,wb=`<div class="pn" style="font-size:13px;text-align:center">🧙 ใบแม่มดรอบนี้: <b>${S.wc}</b> ใบ จาก Tryal ทั้งหมด ${S.tc} ใบ · เปิดแล้ว ${revW}/${S.wc}</div>`;
-const ld=S.ld,lp=S.lp,strip=(ld||lp)?`<div class="action-strip">${ld?`<div class="as-item"><span class="as-label">${esc(ld.n)} จั่ว</span><div class="row">${ld.k.map(k=>k==='con'||k==='non'||ld.who===uid?card(k,40):cbk(40)).join('')}</div></div>`:''}${lp?`<div class="as-item"><span class="as-label">${esc(lp.n)} → ${esc(lp.t)}</span><div>${card(lp.k,40)}</div></div>`:''}</div>`:'';
-A.innerHTML=`${S.ph==='end'?`<div class="pn" style="text-align:center">🏁 เกมจบแล้ว — ${S.win==='town'?'ชาวบ้านชนะ':'แม่มดชนะ'} ${isHost?'<button onclick="sd({t:\'rematch\'})">🔄 กลับล็อบบี้ / เล่นอีกรอบ</button>':'<br>รอหัวหน้าห้องกดเล่นอีกรอบ'}</div>`:''}${p.alive?'':'<div style="background:#6b1010;border-radius:10px;padding:10px;text-align:center;font-size:16px;margin:6px 0">☠ คุณตายแล้ว — ยังดูเกมต่อและใช้แชทได้ แต่เล่นการ์ดไม่ได้แล้ว</div>'}${wb}<div id="tbl">${ring()}${S.players.map((x,i)=>seat(x,i,n,m)).join('')}<div class="ctr"><div class="deck-click ${my&&S.mode!=='draw'?'':'disabled'}" role="button" tabindex="0" title="${my&&S.mode!=='draw'?'คลิกเพื่อจั่ว 2 ใบและจบตา':'รอให้ถึงตาของคุณ'}" onclick="deckClick()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();deckClick()}">${card('non',60).replace(/<text[^]*?<\/text>/g,'')}<div>กองจั่ว ${S.deck?S.deck.length:0}<br>ทิ้ง ${S.disc?S.disc.length:0}</div><small style="color:#ffd35a">${my&&S.mode!=='draw'?'คลิกเพื่อจั่ว 2 ใบ':''}</small></div></div></div>
-${strip}<div class="pn player-panel">
+const ld=S.ld,lp=S.lp,strip=(ld||lp)?`<div class="action-strip">${ld?`<div class="as-item"><span class="as-label">${esc(ld.n)} จั่ว</span><div class="row">${ld.k.map(k=>k==='con'||k==='non'||ld.who===uid?zs('c',k,card(k,28)):cbk(28)).join('')}</div></div>`:''}${lp?`<div class="as-item"><span class="as-label">${esc(lp.n)} → ${esc(lp.t)}</span><div>${zs('c',lp.k,card(lp.k,28))}</div></div>`:''}</div>`:'';
+topStrip=strip;
+A.innerHTML=`${S.ph==='end'?`<div class="pn" style="text-align:center">🏁 เกมจบแล้ว — ${S.win==='town'?'ชาวบ้านชนะ':'แม่มดชนะ'} ${isHost?'<button onclick="sd({t:\'rematch\'})">🔄 กลับล็อบบี้ / เล่นอีกรอบ</button>':'<br>รอหัวหน้าห้องกดเล่นอีกรอบ'}</div>`:''}${p.alive?'':'<div style="background:#6b1010;border-radius:10px;padding:10px;text-align:center;font-size:16px;margin:6px 0">☠ คุณตายแล้ว — ยังดูเกมต่อและใช้แชทได้ แต่เล่นการ์ดไม่ได้แล้ว</div>'}${wb}<div id="tbl">${ring()}${S.players.map((x,i)=>seat(x,i,n,m)).join('')}<div class="ctr"><div class="deck-click ${my&&!S.mode?'':'disabled'}" role="button" tabindex="0" title="${my&&!S.mode?'คลิกเพื่อจั่ว 2 ใบและจบตา':'รอให้ถึงตาของคุณ'}" onclick="deckClick()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();deckClick()}">${card('non',60).replace(/<text[^]*?<\/text>/g,'')}<div>กองจั่ว ${S.deck?S.deck.length:0}<br>ทิ้ง ${S.disc?S.disc.length:0}</div><small style="color:#ffd35a">${my&&!S.mode?'คลิกเพื่อจั่ว 2 ใบ':''}</small></div></div>${deckMsg?`<div class="deck-msg">${deckMsg}</div>`:''}</div>
+<div class="pn player-panel">
 <div class="pp-top">
-<div class="pp-char">${zs('h',p.ch,chc(p.ch,88))}
+<div class="pp-char">
 <div class="pp-role">${role}${con}</div>
-<div class="pp-abil"><b>${esc(TH[p.ch][0])}</b> (${esc(TH[p.ch][1])})
-<div class="pp-abil-text">${esc(TH[p.ch][2])}${IMPL.includes(p.ch)?'':' <small style="opacity:.65">(ยังไม่มีผล)</small>'}</div></div>
 </div>
 <div class="pp-main">
-<div class="pp-tryals">${p.tryal.map(t=>`<span class="pp-tryal">${tf(t.t,42,t.rev?'rv':'')}<small class="${t.rev?'t-open':'t-closed'}">${t.rev?'เปิด':'ปิด'}</small></span>`).join('')}</div>
-<div class="hand" id="myhand">${p.hand.map((k,i)=>`<span onclick="hc(${i})">${card(k,72,U.c===i?'sel':'')}</span>`).join('')}</div>
+<div class="hand" id="myhand">${p.hand.map((k,i)=>`<span onclick="hc(${i})" style="position:relative;display:inline-block">${card(k,72,U.c===i?'sel':'')}<b onclick="event.stopPropagation();zoom('c','${k}')" title="ดูใกล้ ๆ" style="position:absolute;top:3px;right:3px;background:#000c;border-radius:50%;width:26px;height:26px;line-height:26px;text-align:center;font-size:14px;cursor:zoom-in">🔍</b></span>`).join('')}</div>
 </div>
 </div>
-<div class="pp-actions">${msg}${my&&U.c===null&&S.mode!=='draw'?(S.mode==='play'?' <button onclick="sd({t:\'end\'})">จบตา</button>':' <button onclick="sd({t:\'draw\'})">จั่ว 2 ใบ</button>'):''}</div>
-<div class="pp-log">${S.log.slice(-4).map(esc).join('<br>')}</div>
+<div class="pp-actions">${actHtml}</div>
+
 </div>${ov}`}
 function leaveLocal(m){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];clearJoinRetry();annInit=false;annQ.length=0;S=null;code=null;CHAT=[];chKey='';isHost=false;seen={};q=[];U={c:null,tg:null,conf:0};try{sessionStorage.removeItem('sl')}catch(e){}NOTE=m||'';home();chatRender()}
 window.leave=()=>{if(S){U.lv=1;render()}};window.lvNo=()=>{U.lv=0;render()};
@@ -379,9 +396,9 @@ if(o.ph!==S.ph&&!RM)document.querySelectorAll('.ov>div').forEach(d=>d.animate([{
 if(o.turn!==S.turn&&S.ph==='play')bump(seatEl(S.players[S.turn].id),[{transform:TS+' scale(1)'},{transform:TS+' scale(1.14)'},{transform:TS+' scale(1)'}])}finally{prevS=S?JSON.parse(JSON.stringify(S)):null}}
 const r0=render;render=function(){try{chatRender()}catch(e){console.error(e)}if(!S||S.closed){prevS=null;return r0()}
 const ovScroll=document.querySelector('.ov-body,.ov>div');const ovY=ovScroll?ovScroll.scrollTop:0;
-r0();
+topStrip='';r0();
 const ov2=document.querySelector('.ov-body,.ov>div');if(ov2&&ovY)ov2.scrollTop=ovY;
-try{anim()}catch(e){console.error(e)}try{annCheck()}catch(e){console.error(e)}A.insertAdjacentHTML('afterbegin','<div class="top-bar">'+(S.ph!=='lobby'?'<button onclick="abil()" class="btn-abil">📜 ความสามารถ</button>':'')+'<button onclick="leave()" class="btn-leave">🚪 ออก</button></div>');if(U.lv)A.insertAdjacentHTML('beforeend',`<div class="ov" style="z-index:99"><div><h3>ออกจากเกม?</h3><p>${isHost?'คุณเป็นหัวหน้าห้อง ถ้าออก ห้องจะถูกปิดสำหรับทุกคน':'ถ้าเกมเริ่มแล้ว บอทจะเล่นแทนคุณ'}</p><button onclick="lvYes()">ออกเลย</button><button onclick="lvNo()" style="background:#555">ยกเลิก</button></div></div>`)};
+try{anim()}catch(e){console.error(e)}try{annCheck()}catch(e){console.error(e)}A.insertAdjacentHTML('afterbegin','<div class="top-bar"><div class="top-strip">'+topStrip+'</div><div class="top-btns">'+(S.ph!=='lobby'?'<button onclick="abil()" class="btn-abil">📜 ความสามารถ</button>':'')+'<button onclick="leave()" class="btn-leave">🚪 ออก</button></div></div>');if(U.lv)A.insertAdjacentHTML('beforeend',`<div class="ov" style="z-index:99"><div><h3>ออกจากเกม?</h3><p>${isHost?'คุณเป็นหัวหน้าห้อง ถ้าออก ห้องจะถูกปิดสำหรับทุกคน':'ถ้าเกมเริ่มแล้ว บอทจะเล่นแทนคุณ'}</p><button onclick="lvYes()">ออกเลย</button><button onclick="lvNo()" style="background:#555">ยกเลิก</button></div></div>`)};
 let CHAT=[],chOpen=0,chTab='all',chSeen={all:0,witch:0},chKey='';
 function isMobile(){return window.matchMedia('(max-width:900px)').matches}
 function ensureChatChrome(){
