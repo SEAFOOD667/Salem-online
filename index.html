@@ -9,11 +9,13 @@ input{padding:8px;border-radius:8px;border:1px solid #8a6a40;background:#150f0a;
 .w{max-width:1100px;margin:auto;padding:8px}#app.w{width:calc(100% - 2 * var(--chat-w) - 24px);max-width:none;margin-left:calc(var(--chat-w) + 12px);margin-right:calc(var(--chat-w) + 12px);padding:8px}.pn{background:var(--pn);border-radius:12px;padding:10px;margin:8px 0}
 #tbl{position:relative;height:min(62vh,520px);background:radial-gradient(ellipse at center,#5a3a22,#2e1f14 70%);border-radius:24px;border:4px solid #6b4a2a}
 .seat{position:absolute;transform:translate(-50%,-50%);background:#0007;border-radius:10px;padding:3px;text-align:center;font-size:11px;width:max-content;max-width:30%}
-.seat.cur{outline:3px solid #ffd35a}.seat.dead{opacity:.45;filter:grayscale(1)}.seat.tg{outline:3px dashed #7fe0ff;cursor:pointer}
+.seat.cur{outline:3px solid #ffd35a;box-shadow:0 0 0 2px #ffd35a55,0 0 22px #ffd35a88;z-index:6}
+.seat-turn{position:absolute;left:50%;top:-14px;transform:translateX(-50%);background:#c0562f;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 8px #0008;pointer-events:none;z-index:7;letter-spacing:.02em}
+.seat.dead{opacity:.45;filter:grayscale(1)}.seat.tg{outline:3px dashed #7fe0ff;cursor:pointer}
 .row{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}.ctr{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);text-align:center}
 .ov{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:250;padding:10px}.ov>div:not(.ov-sheet){background:var(--pn);border-radius:14px;padding:14px;max-width:560px;max-height:92vh;overflow:auto;text-align:center;width:100%}
 .cd{cursor:pointer}.hand{display:flex;gap:4px;flex-wrap:wrap}.hand svg:hover{transform:translateY(-6px)}.sel{outline:3px solid #7fe0ff;border-radius:8px}
-.nm{font-size:42px}.rv{opacity:.38;filter:grayscale(.8)}.fly{position:fixed;left:0;top:0;pointer-events:none;z-index:120;filter:drop-shadow(0 8px 8px #000a)}.hand svg{transition:transform .15s}.seat.cur{box-shadow:0 0 18px #ffd35a88}
+.nm{font-size:42px}.rv{opacity:.38;filter:grayscale(.8)}.fly{position:fixed;left:0;top:0;pointer-events:none;z-index:120;filter:drop-shadow(0 8px 8px #000a)}.hand svg{transition:transform .15s}
 #chat{position:fixed;top:0;bottom:0;left:0;right:0;z-index:200;pointer-events:none;display:grid;grid-template-columns:var(--chat-w) 1fr var(--chat-w);font-size:13px}
 .chat-side{pointer-events:auto;min-width:0;height:100%;box-sizing:border-box;background:#19120df2;border:2px solid #6b4a2a;padding:8px;display:flex;flex-direction:column;box-shadow:0 0 18px #0008}
 #chat-witch{grid-column:1;border-left:3px solid #8b4545}#chat-town{grid-column:3;border-right:3px solid #8b4545}
@@ -128,10 +130,22 @@ button{min-height:44px;padding:10px 16px;font-size:15px;margin:4px}
 .deck-click:not(.disabled){filter:drop-shadow(0 0 14px #ffd35a)}
 .deck-msg{position:absolute;left:calc(50% + 66px);top:45%;transform:translateY(-50%);width:min(30%,300px);z-index:5;text-align:center}
 .deck-msg .turn-big{font-size:clamp(15px,1.5vw,22px);padding:8px 10px}.deck-msg .turn-note{margin-top:6px}
+.mobile-turn-msg{display:none}
+@media(max-width:900px){
+.deck-msg{display:none !important}
+.mobile-turn-msg{display:block;margin:6px 4px 4px;text-align:center}
+.mobile-turn-msg .turn-big{font-size:14px;padding:8px 10px;border-width:1.5px;border-radius:10px;display:inline-block;max-width:100%}
+.mobile-turn-msg .btn-end{width:100%;max-width:280px;min-height:48px;font-size:17px;margin:4px 0}
+.mobile-turn-msg .turn-note{font-size:12px;margin-top:4px}
+}
 @media (hover:hover) and (pointer:fine){.arr-btns,.only-touch{display:none}}
 [draggable="true"]{user-select:none;border-radius:8px;padding:2px}[draggable="true"]:hover{background:#ffffff14}
 .top-bar{display:flex!important;justify-content:space-between;align-items:center;gap:6px;padding:2px 0;min-height:0}
 .top-strip{flex:1;min-width:0}.top-strip .action-strip{margin:0;display:inline-flex}.top-btns{display:flex;gap:6px;flex-shrink:0}
+
+@media(max-width:900px){
+.seat-turn{font-size:10px;top:-12px;padding:2px 6px}
+}
 </style></head><body><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -324,6 +338,7 @@ function seat(p,i,n,m){const k=(i-m+n)%n,th=Math.PI/2+2*Math.PI*k/n,x=50+40*Math
 const tg=U.c!==null&&p.alive&&!mine;const nT=Math.max(p.tryal?.length||4,4);const tw=Math.max(12,Math.min(24,130/nT));
 const acc=redSum(p),need=p.ch==='George Burroughs'?8:7;
 return `<div data-id="${p.id}" class="seat ${cur?'cur':''} ${p.alive?'':'dead'} ${tg?'tg':''} ${mine?'seat-me':''}" style="left:${x}%;top:${y}%" ${tg?`onclick="sc('${p.id}')"`:''}>
+${cur?`<div class="seat-turn">▶ ตานี้</div>`:''}
 <div class="seat-name">${esc(p.name)}${mine?' <span class="you-tag">คุณ</span>':''}${p.id===S.cat?' 🐈‍⬛':''}${p.alive?'':' ☠'}</div>
 <div class="seat-meta">${TH[p.ch]?esc(TH[p.ch][0]):''} · ✋${p.hand.length}${acc?` · <span class="acc-n">⚖${acc}/${need}</span>`:''}</div>
 <div class="seat-mid"><span class="seat-portrait">${zs('h',p.ch,chc(p.ch,mine?46:40))}</span><div class="row seat-tryals">${p.tryal.map(t=>t.rev||end||mine?zs('t',t.t,tf(t.t,tw,mine&&t.rev?'rv':'')):tb(tw)).join('')}</div></div>
@@ -363,7 +378,7 @@ A.innerHTML=`${S.ph==='end'?`<div class="pn" style="text-align:center">🏁 เ�
 <div class="hand" id="myhand">${p.hand.map((k,i)=>`<span onclick="hc(${i})" style="position:relative;display:inline-block">${card(k,72,U.c===i?'sel':'')}<b onclick="event.stopPropagation();zoom('c','${k}')" title="ดูใกล้ ๆ" style="position:absolute;top:3px;right:3px;background:#000c;border-radius:50%;width:26px;height:26px;line-height:26px;text-align:center;font-size:14px;cursor:zoom-in">🔍</b></span>`).join('')}</div>
 </div>
 </div>
-<div class="pp-actions">${actHtml}</div>
+<div class="pp-actions">${actHtml}</div>${deckMsg?`<div class="mobile-turn-msg">${deckMsg}</div>`:''}
 
 </div>${ov}`}
 function leaveLocal(m){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];clearJoinRetry();annInit=false;annQ.length=0;S=null;code=null;CHAT=[];chKey='';isHost=false;seen={};q=[];U={c:null,tg:null,conf:0};try{sessionStorage.removeItem('sl')}catch(e){}NOTE=m||'';home();chatRender()}
