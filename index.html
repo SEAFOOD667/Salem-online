@@ -180,25 +180,28 @@ return `<svg class="cd" width="${w}" viewBox="0 0 120 170"><title>${esc(nm+': '+
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a},pick=a=>a[Math.random()*a.length|0];
 const al=S=>S.players.filter(p=>p.alive),P=(S,id)=>S.players.find(p=>p.id===id),hasW=p=>!!p.w||(p.tryal||[]).some(t=>t.t==='W'&&!t.rev),isC=p=>p.alive&&p.tryal.some(t=>t.t==='C'&&!t.rev);
 const lg=(S,m)=>{S.log.push(m);S.log=S.log.slice(-25)},unrev=p=>p.tryal.map((t,i)=>t.rev?-1:i).filter(i=>i>=0);
-const val=(p,k)=>k==='acc'?1:k==='wit'?7:k==='evi'?(p.ch==='Cotton Mather'?1:3):0,redSum=p=>p.front.reduce((s,k)=>s+val(p,k),0);
+const ef=p=>{if(!p||p.ch!=='Martha Corey'||typeof S==='undefined'||!S||!S.players)return p&&p.ch;const a=S.players.filter(x=>x.alive),i=a.indexOf(p);if(i<0||a.length<2)return p.ch;return a[(i-1+a.length)%a.length].ch};
+const val=(p,k)=>k==='acc'?1:k==='wit'?7:k==='evi'?(ef(p)==='Cotton Mather'?1:3):0,redSum=p=>p.front.reduce((s,k)=>s+val(p,k),0);
 // ===== ENGINE (host only) =====
 const TBL={4:[18,1],5:[23,1],6:[27,2],7:[32,2],8:[29,2],9:[33,2],10:[27,2],11:[30,2],12:[33,2]};
 function startGame(S){const n=S.players.length,[nw0,w0]=TBL[n],w=Math.max(1,Math.round(n*0.25)),nw=nw0+w0-w;let tr=shuf([...Array(nw).fill('N'),...Array(w).fill('W'),'C']);const per=tr.length/n,cs=shuf(CH.map(c=>c[0]));
 S.players.forEach((p,i)=>{p.ch=cs[i];p.tryal=tr.splice(0,per).map(t=>({t,rev:false}));p.hand=[];p.front=[];p.alive=true;p.ready=!!p.bot;p.w=p.tryal.some(t=>t.t==='W')});
 const B={acc:35,evi:5,wit:1,ali:3,sto:3,rob:3,sca:2,mat:2,asy:1,cur:1,pie:1};let d=[];for(const k in B)for(let i=0;i<B[k];i++)d.push(k);shuf(d);
 S.players.forEach(p=>{for(let i=0;i<3;i++)p.hand.push(d.pop())});d.push('con');shuf(d);d.unshift('non');S.deck=d;S.disc=[];S.pend=null;S.cat=null;S.wc=w;S.tc=nw+w+1;S.wseen=[];S.ph='reveal';S.turn=0;lg(S,`เริ่มเกม ${n} คน! 🧙 รอบนี้มีใบแม่มด ${w} ใบ จาก Tryal ทั้งหมด ${nw+w+1} ใบ`)}
-function ann(S,o){S.ak=(S.ak||0)+1;o.k=S.ak;S.anns=(S.anns||[]).concat(o).slice(-8)}
+function ann(S,o){S.ak=(S.ak||0)+1;o.k=S.ak;S.anns=(S.anns||[]).concat(o).slice(-14)}
 function die(S,p){if(!p.alive)return;const mm=p.front.includes('mat');p.alive=false;p.tryal.forEach(t=>t.rev=true);ann(S,{kind:'death',who:p.id,name:p.name,cards:p.tryal.map(t=>t.t)});if(p.front.includes('cat'))S.cat=null;
-const pr=S.players.find(q=>q.alive&&q.ch==='John Proctor'),bl=p.front.filter(isBlue);if(pr){pr.hand.push(...bl);p.front=p.front.filter(k=>!isBlue(k))}
+const pr=S.players.find(q=>q.alive&&ef(q)==='John Proctor'),bl=p.front.filter(isBlue);if(pr){pr.hand.push(...bl);p.front=p.front.filter(k=>!isBlue(k))}
 S.disc.push(...p.hand,...p.front.filter(k=>k!=='cat'));p.hand=[];p.front=[];lg(S,`☠ ${p.name} เสียชีวิต`);
-if(mm){const o=S.players.find(q=>q.alive&&q.front.includes('mat')&&q.ch!=='Mary Warren');if(o){lg(S,'💘 Matchmaker พาอีกคนตายตาม');die(S,o)}}}
+if(mm){const o=S.players.find(q=>q.alive&&q.front.includes('mat')&&ef(q)!=='Mary Warren');if(o){lg(S,'💘 Matchmaker พาอีกคนตายตาม');die(S,o)}}}
 function check(S){let c=1;while(c){c=0;for(const p of S.players)if(p.alive&&(p.tryal.every(t=>t.rev)||p.tryal.some(t=>t.t==='W'&&t.rev))){die(S,p);c=1}}
 if(S.ph==='end'||S.ph==='lobby')return;const W=S.players.flatMap(p=>p.tryal).filter(t=>t.t==='W');
 if(W.every(t=>t.rev))fin2(S,'town','เปิด Witch ครบทุกใบแล้ว');else if(al(S).every(hasW))fin2(S,'witch','ผู้เล่นที่เหลือเป็นแม่มดทั้งหมด');
 else if(al(S).length<=2){const k=al(S).length;if(al(S).some(hasW))fin2(S,'witch','เหลือผู้เล่น '+k+' คน และแม่มดยังรอดอยู่');else fin2(S,'town','เหลือผู้เล่น '+k+' คน และไม่มีแม่มดเหลือ')}}
 function fin2(S,w,why){S.ph='end';S.win=w;S.winWhy=why||'';S.pend=null;S.night=null;lg(S,(w==='town'?'🏆 ชาวบ้านชนะ!':'🏆 แม่มดครองเมือง!')+(why?' ('+why+')':''))}
 function toWsee(S){S.players.forEach(x=>x.wr=!hasW(x)||!!x.bot);S.ph='wsee';lg(S,'👁 แม่มดลืมตาดูหน้ากัน');if(S.players.every(x=>x.wr))toDawn(S)}
-function toDawn(S){S.wseen=S.players.filter(hasW).map(x=>x.id);S.ph='dawn';lg(S,'🌅 Dawn: แม่มดเลือกผู้รับแมวดำ')}
+const DAWN_MS=15000;
+function toDawn(S){S.wseen=S.players.filter(hasW).map(x=>x.id);S.ph='dawn';S.dawnEnd=Date.now()+DAWN_MS;S.cv={};lg(S,'🌅 Dawn: แม่มดเลือกผู้รับแมวดำ')}
+function endDawn(S){const cnt={};Object.values(S.cv||{}).forEach(v=>{if(P(S,v))cnt[v]=(cnt[v]||0)+1});let mx=0;for(const k in cnt)mx=Math.max(mx,cnt[k]);const top=Object.keys(cnt).filter(k=>cnt[k]===mx),t=top.length?P(S,pick(top)):pick(S.players);t.front.push('cat');S.cat=t.id;S.turn=S.players.indexOf(t);S.cv=null;S.ph='play';lg(S,`🐈‍⬛ แมวดำตกอยู่กับ ${t.name} เขาเริ่มเกม`)}
 function nextTurn(S,fromId){S.ending=false;S.mode=null;let i=S.players.findIndex(p=>p.id===fromId);for(let c=0;c<S.players.length*2;c++){i=(i+1)%S.players.length;const p=S.players[i];if(!p.alive)continue;const s=p.front.indexOf('sto');if(s>=0){p.front.splice(s,1);S.disc.push('sto');lg(S,`${p.name} ติด Stocks ข้ามตา`);continue}S.turn=i;return}}
 function fin(S){check(S);if(S.ph!=='play'||S.pend)return;const p=S.players[S.turn];if(!p.alive){nextTurn(S,p.id);return}if(!S.ending)return;if(p.alive&&p.hand.length>7){S.pend={t:'dis',by:p.id};return}nextTurn(S,p.id)}
 const donor=(S,p)=>{const a=al(S),i=a.indexOf(p);return a[(i+1)%a.length]};
@@ -207,10 +210,41 @@ function resolveCons(S){const c=S.cons,mv=[];al(S).forEach(p=>{const d=donor(S,p
 mv.forEach(([p,d,t])=>d.tryal.splice(d.tryal.indexOf(t),1));mv.forEach(([p,d,t])=>p.tryal.splice(Math.random()*(p.tryal.length+1)|0,0,t));S.players.forEach(x=>{if(x.tryal.some(t=>t.t==='W'))x.w=1});
 const mp={};al(S).forEach(x=>mp[x.id]={});mv.forEach(([p,d,t])=>{mp[p.id].got={t:t.t,from:d.name};mp[d.id].lost={t:t.t,to:p.name}});S.cr={k:Date.now(),map:mp};
 S.disc.push('con');lg(S,'🔁 ทุกคนหยิบ Tryal จากผู้เล่นทางซ้ายแล้ว');const by=P(S,c.by),cat=P(S,S.cat);S.cons=null;S.ph='play';
-if(cat&&cat.alive&&cat.ch!=='Mary Warren'&&unrev(cat).length){S.pend={t:'rev',by:by.id,tgt:cat.id,why:'cat'};lg(S,`${by.name} เปิด Tryal ของผู้ถือแมวดำ`)}
+if(cat&&cat.alive&&ef(cat)!=='Mary Warren'&&unrev(cat).length){S.pend={t:'rev',by:by.id,tgt:cat.id,why:'cat'};lg(S,`${by.name} เปิด Tryal ของผู้ถือแมวดำ`)}
 check(S);if(S.ph==='play')drawN(S,by,c.rem,1);if(S.ph==='play')fin(S)}
 function drawN(S,p,n,keep){if(!keep)S.ld={who:p.id,n:p.name,k:[]};let g=0;while(g<n&&S.ph==='play'){const c=S.deck.pop();if(!c)break;if(c==='non'){S.ld.k.push('non');S.ph='night';S.night={end:Date.now()+20000,by:p.id,k:{},sv:null,cf:[],nw:S.players.filter(x=>x.alive&&hasW(x)&&!(S.wseen||[]).includes(x.id)).map(x=>x.id)};lg(S,'🌙 ราตรีมาเยือน (Night)');return}if(c==='con'){S.ld.k.push('con');conspiracy(S,p,n-g);return}S.ld.k.push(c);p.hand.push(c);g++}}
-function accuse(S,by,t){if(redSum(t)>=(t.ch==='George Burroughs'?8:7)){const r=t.front.filter(isRed);t.front=t.front.filter(k=>!isRed(k));S.disc.push(...r);S.pend={t:'rev',by:by.id,tgt:t.id,why:'acc'};lg(S,`⚖ ${t.name} ถูกกล่าวหาครบ! ${by.name} เลือกเปิด Tryal`)}}
+const _drawN=drawN;drawN=function(S,p,n,keep){const b=keep&&S.ld?S.ld.k.length:0;_drawN(S,p,n,keep);const got=(S.ld&&S.ld.who===p.id)?S.ld.k.slice(b):[];if(got.length)ann(S,{kind:'draw',who:p.id,name:p.name,cards:got})};
+function accuse(S,by,t){if(redSum(t)>=(ef(t)==='George Burroughs'?8:7)){const r=t.front.filter(isRed);t.front=t.front.filter(k=>!isRed(k));S.disc.push(...r);S.pend={t:'rev',by:by.id,tgt:t.id,why:'acc'};lg(S,`⚖ ${t.name} ถูกกล่าวหาครบ! ${by.name} เลือกเปิด Tryal`)}}
+
+/* ===== ความสามารถตัวละคร (ต่อท้ายตัวเดิม ไม่แก้ตรรกะเดิม) ===== */
+const AU=(p,k)=>(p.u&&p.u[k])||0,AUS=(p,k)=>{p.u=p.u||{};p.u[k]=(p.u[k]||0)+1};
+function abNote(S,p,txt){lg(S,`✨ ${p.name} ใช้ความสามารถ ${TH[ef(p)][0]}: ${txt}`);ann(S,{kind:'ab',who:p.id,name:p.name,ch:ef(p),txt})}
+/* จั่วกลางตา (ไม่ทริกเกอร์ Night/Conspiracy): ถ้าเจอใบพวกนั้นให้สอดกลับกอง */
+function safeDraw(S,p,n){const got=[],sk=[];while(got.length<n&&S.deck.length){const c=S.deck.pop();if(c==='non'||c==='con'){sk.push(c);continue}got.push(c);p.hand.push(c)}
+sk.forEach(c=>{if(c==='non')S.deck.unshift(c);else S.deck.splice(Math.random()*(S.deck.length+1)|0,0,c)});
+if(got.length){S.ld={who:p.id,n:p.name,k:got.slice()};ann(S,{kind:'draw',who:p.id,name:p.name,cards:got.slice()})}return got}
+/* Giles Corey: จั่ว 2 ใบเป็น Accusation ทั้งคู่ -> เสนอให้จั่วใบที่สาม */
+function gilesChk(S,p){if(S.ph==='play'&&!S.pend&&ef(p)==='Giles Corey'&&S.ld&&S.ld.who===p.id&&S.ld.k.length===2&&S.ld.k.every(k=>k==='acc'))S.pend={t:'ab',k:'giles',by:p.id}}
+/* Rebecca Nurse: มี Tryal ของคนอื่นถูกเปิด (ไม่นับตายหรือสารภาพ) -> เสนอให้จั่ว 1 ใบ */
+function rebChk(S,t,why){if(!['acc','cat','abil'].includes(why))return;const r=S.players.find(x=>x.alive&&ef(x)==='Rebecca Nurse'&&x!==t);if(r)S.pend={t:'ab',k:'rebecca',by:r.id,tgt:t.id}}
+/* Thomas Danforth: วางการกล่าวหาที่ 6 (หรือ 7) ใส่ผู้เล่น -> เสนอให้เปิด Tryal 1 ใบ */
+const _accuse=accuse;accuse=function(S,by,t){_accuse(S,by,t);if(!S.pend&&S.ph==='play'&&t.alive&&ef(by)==='Thomas Danforth'&&unrev(t).length){const s=redSum(t);if(s>=6&&s<(ef(t)==='George Burroughs'?8:7))S.pend={t:'ab',k:'danf',by:by.id,tgt:t.id}}};
+/* ตอบข้อเสนอความสามารถ (S.pend.t==='ab') และความสามารถระหว่างรอเปิด Tryal (Abigail / Ann) */
+function abPend(S,p,a){const pe=S.pend,ch=ef(p);
+if(pe.t==='ab'){if(a.t==='abn'){S.pend=null;fin(S);return}if(a.k!==pe.k)return;
+if(pe.k==='giles'&&ch==='Giles Corey'){S.pend=null;abNote(S,p,'จั่วใบที่สาม');drawN(S,p,1,1);fin(S)}
+else if(pe.k==='rebecca'&&ch==='Rebecca Nurse'){S.pend=null;abNote(S,p,'จั่ว 1 ใบ');safeDraw(S,p,1);fin(S)}
+else if(pe.k==='danf'&&ch==='Thomas Danforth'){const t=P(S,pe.tgt);if(!t||!t.alive||!unrev(t).length){S.pend=null;fin(S);return}const r=t.front.filter(isRed);t.front=t.front.filter(k=>!isRed(k));S.disc.push(...r);abNote(S,p,'เปิด Tryal 1 ใบของ '+t.name+' (ทิ้งการกล่าวหาหน้าเขา '+r.length+' ใบ)');S.pend={t:'rev',by:p.id,tgt:t.id,why:'abil'}}
+return}
+if(pe.t==='rev'&&a.t==='ab'&&pe.why==='acc'&&!pe.u){
+if(a.k==='abigail'&&ch==='Abigail Williams'){const r=p.front.filter(isRed);if(!r.length)return;p.front=p.front.filter(k=>!isRed(k));S.disc.push(...r);pe.u=1;abNote(S,p,'ทิ้งการกล่าวหาหน้าตัวเอง '+r.length+' ใบ')}
+else if(a.k==='ann'&&ch==='Ann Putnam'){pe.u=1;abNote(S,p,'จั่ว 2 ใบก่อนเปิด Tryal');safeDraw(S,p,2)}}}
+/* ความสามารถที่ใช้ในตาตัวเองก่อนจั่ว: Tituba (1 ครั้ง) / Samuel Parris (2 ครั้ง) */
+function abTurn(S,p,a){if(S.mode||S.pend)return;const ch=ef(p);
+if(a.k==='tituba'&&ch==='Tituba'&&AU(p,'tit')<1){const n=S.deck.length-(S.deck[0]==='non'?1:0),o=a.o;if(n<2||!Array.isArray(o)||o.length!==n||new Set(o).size!==n||!o.every(i=>Number.isInteger(i)&&i>=0&&i<n))return;
+const v=S.deck.splice(S.deck.length-n,n).reverse();S.deck.push(...o.map(i=>v[i]).reverse());AUS(p,'tit');abNote(S,p,'จัดลำดับไพ่ในกองจั่วใหม่ทั้งกอง ('+n+' ใบ)')}
+else if(a.k==='parris'&&ch==='Samuel Parris'&&AU(p,'par')<2){const ix=a.ix;if(!Array.isArray(ix)||!ix.length||ix.length>2||new Set(ix).size!==ix.length||!ix.every(i=>Number.isInteger(i)&&i>=0&&i<S.disc.length&&S.disc[i]!=='con'))return;
+const got=ix.map(i=>S.disc[i]);[...ix].sort((x,y)=>y-x).forEach(i=>S.disc.splice(i,1));p.hand.push(...got);AUS(p,'par');S.mode='draw';S.ending=true;S.ld={who:p.id,n:p.name,k:got.slice()};ann(S,{kind:'draw',who:p.id,name:p.name,cards:got.slice()});abNote(S,p,'จั่ว '+got.length+' ใบจากกองทิ้งแทนกองจั่ว');fin(S)}}
 function resolveNight(S){const n=S.night,ws=al(S).filter(hasW),cnt={};ws.forEach(w=>{const v=n.k[w.id];if(v)cnt[v]=(cnt[v]||0)+1});
 let tg=null,b=0,tie=0;for(const k in cnt){if(cnt[k]>b){b=cnt[k];tg=k;tie=0}else if(cnt[k]===b)tie=1}if(tie)tg=null;const t=tg&&P(S,tg);let res={k:'none'};
 if(t&&t.id!==n.sv&&!n.cf.includes(t.id)&&!t.front.includes('asy')){res={k:'dead',name:t.name};die(S,t)}
@@ -228,24 +262,26 @@ if(!p)return;
 if(a.t==='ready'&&S.ph==='reveal'){p.ready=true;if(S.players.every(x=>x.ready)){S.players.forEach(x=>x.ar=!!x.bot);S.ph='arr';lg(S,'🃏 ทุกคนจัดลำดับไพ่ Tryal ของตัวเอง');if(S.players.every(x=>x.ar))toWsee(S)}return}
 if(a.t==='arrok'&&S.ph==='arr'){const o=a.o,n=p.tryal.length;if(Array.isArray(o)&&o.length===n&&new Set(o).size===n&&o.every(i=>Number.isInteger(i)&&i>=0&&i<n))p.tryal=o.map(i=>p.tryal[i]);p.ar=true;if(S.players.every(x=>x.ar))toWsee(S);return}
 if(a.t==='wready'&&S.ph==='wsee'&&hasW(p)){p.wr=true;if(S.players.every(x=>x.wr))toDawn(S);return}
-if(a.t==='cat'&&S.ph==='dawn'&&hasW(p)){const t=P(S,a.tg);if(!t)return;t.front.push('cat');S.cat=t.id;S.turn=S.players.indexOf(t);S.ph='play';lg(S,`🐈‍⬛ แมวดำตกอยู่กับ ${t.name} เขาเริ่มเกม`);return}
-if(a.t==='conf'&&S.ph==='night'&&p.alive&&!S.night.cf.includes(p.id)){const u=unrev(p);if(!u.includes(a.i))return;p.tryal[a.i].rev=true;S.night.cf.push(p.id);ann(S,{kind:'rev',who:p.id,name:p.name,i:a.i,t:p.tryal[a.i].t,why:'conf'});lg(S,`🙏 ${p.name} สารภาพ (เปิด Tryal 1 ใบ)`);check(S);return}
+if(a.t==='cat'&&S.ph==='dawn'&&hasW(p)){if(!P(S,a.tg))return;S.cv=S.cv||{};S.cv[p.id]=a.tg;return}
+if(a.t==='conf'&&S.ph==='night'&&p.alive&&!S.night.cf.includes(p.id)){if(a.free){if(ef(p)!=='William Phips'||AU(p,'phips')>=1)return;AUS(p,'phips');S.night.cf.push(p.id);abNote(S,p,'สารภาพโดยไม่ต้องเปิด Tryal');check(S);return}const u=unrev(p);if(!u.includes(a.i))return;p.tryal[a.i].rev=true;S.night.cf.push(p.id);ann(S,{kind:'rev',who:p.id,name:p.name,i:a.i,t:p.tryal[a.i].t,why:'conf'});lg(S,`🙏 ${p.name} สารภาพ (เปิด Tryal 1 ใบ)`);check(S);return}
 if(a.t==='cpick'&&S.ph==='cons'&&p.alive&&S.cons.picks[p.id]===undefined){const d=donor(S,p);if(d===p||!unrev(d).includes(a.i))return;S.cons.picks[p.id]=a.i;if(al(S).every(x=>{const dd=donor(S,x);return dd===x||!unrev(dd).length||S.cons.picks[x.id]!==undefined}))resolveCons(S);return}
 if(a.t==='nk'&&S.ph==='night'&&p.alive&&hasW(p)&&P(S,a.tg)?.alive){S.night.k[p.id]=a.tg;return}
 if(a.t==='ns'&&S.ph==='night'&&isC(p)&&a.tg!==p.id&&P(S,a.tg)?.alive){S.night.sv=a.tg;return}
 if(S.ph!=='play')return;
-if(a.t==='rev'&&S.pend?.t==='rev'&&S.pend.by===id){const t=P(S,S.pend.tgt);if(!t||!unrev(t).includes(a.i))return;t.tryal[a.i].rev=true;lg(S,`🔍 เปิด Tryal ของ ${t.name} เป็น: ${{W:'แม่มด',N:'ไม่ใช่แม่มด',C:'ตำรวจเมือง'}[t.tryal[a.i].t]}`);ann(S,{kind:'rev',who:t.id,name:t.name,i:a.i,t:t.tryal[a.i].t,why:S.pend.why});S.pend=null;fin(S);return}
+if(a.t==='rev'&&S.pend?.t==='rev'&&S.pend.by===id){const t=P(S,S.pend.tgt);if(!t||!unrev(t).includes(a.i))return;t.tryal[a.i].rev=true;lg(S,`🔍 เปิด Tryal ของ ${t.name} เป็น: ${{W:'แม่มด',N:'ไม่ใช่แม่มด',C:'ตำรวจเมือง'}[t.tryal[a.i].t]}`);ann(S,{kind:'rev',who:t.id,name:t.name,i:a.i,t:t.tryal[a.i].t,why:S.pend.why});const wy=S.pend.why;S.pend=null;check(S);if(S.ph==='play')rebChk(S,t,wy);fin(S);return}
 if(a.t==='dis'&&S.pend?.t==='dis'&&S.pend.by===id){if(a.i>=p.hand.length)return;S.disc.push(...p.hand.splice(a.i,1));if(p.hand.length<=7)S.pend=null;fin(S);return}
+if(S.pend&&S.pend.by===id&&(a.t==='ab'||a.t==='abn')){abPend(S,p,a);return}
 if(S.pend||me.id!==id)return;
 if(a.t==='end'){if(S.mode!=='play')return;S.ending=true;lg(S,`${p.name} จบตา`);fin(S);return}
-if(a.t==='draw'){if(S.mode)return;S.mode='draw';S.ending=true;lg(S,`${p.name} จบตา และจั่ว 2 ใบ`);drawN(S,p,2);fin(S);return}
-if(a.t==='play'){if(S.mode==='draw')return;const k=p.hand[a.i],t=P(S,a.tg),t2=P(S,a.t2);if(!k||!t?.alive)return;let ok=1,keep=0;
+if(a.t==='draw'){if(S.mode)return;S.mode='draw';S.ending=true;lg(S,`${p.name} จบตา และจั่ว 2 ใบ`);drawN(S,p,2);gilesChk(S,p);fin(S);return}
+if(a.t==='ab'){abTurn(S,p,a);return}
+if(a.t==='play'){if(S.mode==='draw')return;let k=p.hand[a.i];const t=P(S,a.tg),t2=P(S,a.t2);if(k==='ali'&&a.as&&ef(p)==='Will Griggs'&&t&&t!==p){k='wit';lg(S,`✨ ${p.name} (Will Griggs) ใช้พยานปากแก้เป็นพยาน`)}if(!k||!t?.alive)return;let ok=1,keep=0;
 if(isRed(k)){if(t===p||t.front.includes('pie'))return;t.front.push(k);keep=1;lg(S,`${p.name} ลง ${CD[k][1]} ใส่ ${t.name}`);p.hand.splice(a.i,1);accuse(S,p,t)}
 else{p.hand.splice(a.i,1);
 if(isBlue(k)||k==='sto'){if(t===p)ok=0;else{t.front.push(k);keep=1}}
 else if(k==='cur'){const i=t.front.findIndex(isBlue);if(t===p||i<0)ok=0;else S.disc.push(t.front.splice(i,1)[0])}
 else if(k==='ali'){if(t===p)ok=0;else{let r=3;t.front.filter(isRed).sort((x,y)=>val(t,y)-val(t,x)).forEach(c=>{if(val(t,c)<=r){r-=val(t,c);t.front.splice(t.front.indexOf(c),1);S.disc.push(c)}})}}
-else if(k==='ars'||k==='rob'){if(t===p||(k==='rob'&&(!t2?.alive||t2===t||t2===p)))ok=0;else if(t.ch==='Sarah Good')lg(S,'Sarah Good ไม่ได้รับผลของการ์ด');else if(k==='ars'){S.disc.push(...t.hand);t.hand=[]}else{t2.hand.push(...t.hand);t.hand=[]}}
+else if(k==='ars'||k==='rob'){if(t===p||(k==='rob'&&(!t2?.alive||t2===t||t2===p)))ok=0;else if(ef(t)==='Sarah Good')lg(S,'Sarah Good ไม่ได้รับผลของการ์ด');else if(k==='ars'){S.disc.push(...t.hand);t.hand=[]}else{t2.hand.push(...t.hand);t.hand=[]}}
 else if(k==='sca'){if(t===p||!t2?.alive||t2===t||t2===p)ok=0;else{const m=t.front.filter(x=>x!=='cat');t.front=t.front.filter(x=>x==='cat');t2.front.push(...m);accuse(S,p,t2)}}
 if(!ok){p.hand.splice(a.i,0,k);return}
 if(!keep)S.disc.push(k);lg(S,`${p.name} ใช้ ${CD[k][1]} กับ ${t.name}`)}
@@ -255,11 +291,11 @@ const now=Date.now();
 // หน่วงบอทให้อ่าน/ดูทัน: ตาเล่น ~2.8–3.8 วิ, เลือกเปิดไพ่/ทิ้ง ~1.8 วิ, กลางคืน/สมคบคิด ~1.5 วิ
 const wait=(ms)=>{if(now<(S.botAt||0))return true;S.botAt=now+ms;return false};
 if(S.ph==='cons'){if(wait(1500))return;for(const b of al(S).filter(x=>x.bot)){if(S.cons.picks[b.id]===undefined){const u=unrev(donor(S,b));if(u.length)act(S,b.id,{t:'cpick',i:pick(u)})}}return}
-if(S.ph==='dawn'){if(wait(2000))return;const w=S.players.filter(hasW);if(w.every(x=>x.bot)){const o=S.players.filter(x=>!hasW(x));act(S,w[0].id,{t:'cat',tg:pick(o.length?o:S.players).id})}return}
+if(S.ph==='dawn'){if(wait(2000))return;for(const b of S.players.filter(x=>hasW(x)&&x.bot)){if(S.cv&&S.cv[b.id])continue;const o=S.players.filter(x=>!hasW(x)),v=Object.values(S.cv||{})[0]||pick(o.length?o:S.players).id;act(S,b.id,{t:'cat',tg:v})}return}
 if(S.ph==='night'){if(wait(1500))return;for(const b of al(S).filter(x=>x.bot)){if(hasW(b)&&!S.night.k[b.id]){const v=Object.values(S.night.k)[0]||pick(al(S).filter(x=>!hasW(x)).length?al(S).filter(x=>!hasW(x)):al(S)).id;act(S,b.id,{t:'nk',tg:v})}
 if(isC(b)&&!S.night.sv)act(S,b.id,{t:'ns',tg:pick(al(S).filter(x=>x!==b)).id})}return}
 if(S.ph!=='play')return;const pe=S.pend;
-if(pe){const b=P(S,pe.by);if(!b||!b.bot)return;if(wait(1800))return;if(pe.t==='rev')act(S,b.id,{t:'rev',i:pick(unrev(P(S,pe.tgt)))});else act(S,b.id,{t:'dis',i:Math.random()*b.hand.length|0});return}
+if(pe){const b=P(S,pe.by);if(!b||!b.bot)return;if(wait(1800))return;if(pe.t==='rev')act(S,b.id,{t:'rev',i:pick(unrev(P(S,pe.tgt)))});else if(pe.t==='ab')act(S,b.id,{t:'abn'});else act(S,b.id,{t:'dis',i:Math.random()*b.hand.length|0});return}
 const p=S.players[S.turn];if(!p||!p.bot||!p.alive)return;
 if(wait(2800+Math.random()*1000|0))return;
 const o=al(S).filter(x=>x!==p),op=[];
@@ -304,9 +340,10 @@ unsubs.push(db.collection(`rooms/${code}/joins`).onSnapshot(sn=>{if(absorbJoins(
 publish()}
 else{requestJoin(name);let tries=0;joinRetry=setInterval(()=>{if(!S||S.ph!=='lobby'||P(S,uid)||++tries>12){clearJoinRetry();return}requestJoin(myName)},1200)}
 unsubs.push(db.collection(`rooms/${code}/chat`).onSnapshot(sn=>{CHAT=sn.docs.map(d=>d.data()).sort((a,b)=>a.ts-b.ts);chatRender()}));render()};
+var _cvk='';const tickCd=()=>{const e=document.getElementById('cd'),T=S.night||S.cons,t=S.ph==='dawn'?S.dawnEnd:(T&&T.end);if(e&&t)e.textContent=Math.max(0,Math.ceil((t-Date.now())/1000))};
 setInterval(()=>{if(!S)return;if(isHost){
 if(S.ph==='lobby'){db.collection(`rooms/${code}/joins`).get().then(snap=>{if(absorbJoins(snap.docs)){publish();render()}}).catch(()=>{})}
-if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}if(S.ph==='reveal'||S.ph==='arr'||S.ph==='wsee'||S.ph==='dawn'){/* อย่า rebuild overlay ทุกวินาที */const cd=document.getElementById('cd');const T=S.night||S.cons;if(cd&&T)cd.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}else render()}else{const e=document.getElementById('cd');const T=S.night||S.cons;if(e&&T)e.textContent=Math.max(0,Math.ceil((T.end-Date.now())/1000))}},1100);
+if(S.ph==='dawn'&&Date.now()>S.dawnEnd){endDawn(S);publish()}else if(S.ph==='night'&&Date.now()>S.night.end){resolveNight(S);publish()}else if(S.ph==='morn'&&Date.now()>S.morn.end){finishMorning(S);publish()}else if(S.ph==='cons'&&Date.now()>S.cons.end){resolveCons(S);publish()}else if(S.ph!=='lobby'&&S.ph!=='end'){try{bot(S)}catch(e){}publish()}if(S.ph==='reveal'||S.ph==='arr'||S.ph==='wsee'||S.ph==='dawn'){/* อย่า rebuild overlay ทุกวินาที */if(S.ph==='dawn'){const k=JSON.stringify(S.cv);if(k!==_cvk){_cvk=k;render()}}tickCd()}else render()}else{tickCd()}},1100);
 // ===== UI =====
 const me=()=>S&&P(S,uid);
 let topStrip='',NOTE='';function toast(m){NOTE=m;if(!S)home()}
@@ -316,27 +353,44 @@ window.jn=()=>{const n=document.getElementById('nm').value.trim()||'ผู้เ
 window.sd=a=>{send(a)};
 window.arrDS=i=>{U.drag=i};window.arrDrop=j=>{const i=U.drag;if(i==null||i===j||!U.arr)return;const x=U.arr.splice(i,1)[0];U.arr.splice(j,0,x);U.drag=null;render()};
 window.arrMv=(i,d)=>{const a=U.arr,j=i+d;if(!a||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()};
-window.arrOk=()=>{send({t:'arrok',o:U.arr});U.arrSent=1;render()};window.cancel=()=>{U.c=null;U.tg=null;render()};
+window.arrOk=()=>{send({t:'arrok',o:U.arr});U.arrSent=1;render()};window.cancel=()=>{U.c=null;U.tg=null;U.as=0;render()};
 window.deckClick=()=>{const p=me(),cur=S&&S.players[S.turn];if(!S||S.ph!=='play'||!p||!p.alive||!cur||cur.id!==uid||S.pend||S.mode)return;send({t:'draw'})};
-const IMPL=['Cotton Mather','George Burroughs','Sarah Good','Mary Warren','John Proctor'];
+const IMPL=CH.map(c=>c[0]);
 window.abil=()=>{if(!S)return;const d=document.createElement('div');d.className='ov';d.style.zIndex=250;d.innerHTML=`<div style="text-align:left;max-width:520px"><h3 style="text-align:center">📜 ความสามารถตัวละครของทุกคน</h3>${S.players.map(x=>TH[x.ch]?`<div style="margin:8px 0;padding:6px;border-radius:8px;background:#0005${x.alive?'':';opacity:.5'}"><b>${esc(x.name)}${x.id===uid?' (คุณ)':''}</b> — ${esc(TH[x.ch][0])} (${esc(TH[x.ch][1])})${x.alive?'':' ☠'}<br>${esc(TH[x.ch][2])}${IMPL.includes(x.ch)?' <span style="color:#8f8">✔ ใช้งานในเกม</span>':' <small style="opacity:.7">(ยังไม่มีผลในเกม)</small>'}</div>`:'').join('')}<div style="text-align:center"><button onclick="this.closest('.ov').remove()">ปิด</button></div></div>`;document.body.appendChild(d)};
+const SH=a=>a.kind==='draw'||a.kind==='ab';
+/* ===== UI ความสามารถตัวละคร ===== */
+const AB_BTN='style="background:#6b4a10;border:2px solid #ffd35a;margin:3px"';
+const abOv=(pe,p)=>{const o=P(S,pe.tgt),T={giles:['คุณจั่วได้การกล่าวหา 2 ใบ (ทุกคนเห็นแล้ว)','จั่วใบที่สาม'],rebecca:['มีการเปิด Tryal ของ '+(o?o.name:'ผู้เล่นอื่น'),'จั่ว 1 ใบ'],danf:['คุณวางการกล่าวหาที่ 6 ใส่ '+(o?o.name:''),'เปิด Tryal 1 ใบของเขา']}[pe.k];
+return `<div class="ov"><div style="border:2px solid #ffd35a"><h3>✨ ${esc(TH[ef(p)][0])} ใช้ความสามารถได้!</h3><p>${esc(T[0])}</p><p><small>${esc(TH[ef(p)][2])}</small></p><button ${AB_BTN} onclick="sd({t:'ab',k:'${pe.k}'})">⚡ ${esc(T[1])}</button> <button onclick="sd({t:'abn'})" style="background:#555">ไม่ใช้</button></div></div>`};
+const revAb=(pe,p)=>{if(pe.why!=='acc'||pe.u)return'';const c=ef(p);
+if(c==='Abigail Williams'){const n=p.front.filter(isRed).length;return n?`<p>✨ ${esc(TH[c][0])} ใช้ความสามารถได้<br><button ${AB_BTN} onclick="sd({t:'ab',k:'abigail'})">⚡ ทิ้งการกล่าวหาหน้าตัวเองทั้งหมด (${n} ใบ)</button></p>`:''}
+if(c==='Ann Putnam')return `<p>✨ ${esc(TH[c][0])} ใช้ความสามารถได้<br><button ${AB_BTN} onclick="sd({t:'ab',k:'ann'})">⚡ จั่ว 2 ใบก่อนเปิด Tryal</button></p>`;return''};
+const turnAb=p=>{const c=ef(p);let h='';
+if(c==='Tituba'&&AU(p,'tit')<1&&S.deck&&S.deck.length-(S.deck[0]==='non'?1:0)>=2)h+=`<button ${AB_BTN} onclick="U.tit={o:null};render()">🔮 ใช้ความสามารถ Tituba: จัดลำดับไพ่ในกองจั่วทั้งกอง (ครั้งเดียว)</button>`;
+if(c==='Samuel Parris'&&AU(p,'par')<2&&(S.disc||[]).some(k=>k!=='con'))h+=`<button ${AB_BTN} onclick="U.par=[];render()">📥 ใช้ความสามารถ Parris: จั่วจากกองทิ้งแทนกองจั่ว (เหลือ ${2-AU(p,'par')} ครั้ง)</button>`;return h};
+window.titMv=(i,d)=>{const a=U.tit&&U.tit.o,j=i+d;if(!a||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()};
+window.titDS=i=>{U.drag=i};window.titDrop=j=>{const a=U.tit&&U.tit.o,i=U.drag;if(!a||i==null||i===j)return;const x=a.splice(i,1)[0];a.splice(j,0,x);U.drag=null;render()};
+window.titTo=(i,end)=>{const a=U.tit&&U.tit.o;if(!a)return;const x=a.splice(i,1)[0];end?a.push(x):a.unshift(x);render()};
+window.titOk=()=>{if(!U.tit||!U.tit.o)return;send({t:'ab',k:'tituba',o:U.tit.o});U.tit=null;render()};
+window.parTg=i=>{const a=U.par;if(!a)return;const j=a.indexOf(i);if(j>=0)a.splice(j,1);else if(a.length<2)a.push(i);render()};
+window.parOk=()=>{if(!U.par||!U.par.length)return;send({t:'ab',k:'parris',ix:U.par});U.par=null;render()};
 const annQ=[];let annBusy=0,annInit=false;
-const LBL={W:'แม่มด!',N:'ไม่ใช่แม่มด',C:'ตำรวจเมือง'},WHY={acc:'ถูกกล่าวหาครบ',cat:'ผลของสมคบคิด (ผู้ถือแมวดำ)',conf:'สารภาพบาป'};
+const LBL={W:'แม่มด!',N:'ไม่ใช่แม่มด',C:'ตำรวจเมือง'},WHY={acc:'ถูกกล่าวหาครบ',cat:'ผลของสมคบคิด (ผู้ถือแมวดำ)',conf:'สารภาพบาป',abil:'ความสามารถตัวละคร'};
 function annCheck(){if(!S)return;if(!annInit){U.annSeen=S.ak||0;annInit=true}(S.anns||[]).filter(a=>a.k>(U.annSeen||0)).forEach(a=>{annQ.push(a);U.annSeen=Math.max(U.annSeen||0,a.k)});annPump()}
-function annPump(){if(annBusy||!annQ.length)return;annBusy=1;toast2(annQ.shift());setTimeout(()=>{annBusy=0;annPump()},4300)}
+function annPump(){while(annQ.length>2&&SH(annQ[0]))annQ.shift();if(annBusy||!annQ.length)return;annBusy=1;const a=annQ.shift();toast2(a);setTimeout(()=>{annBusy=0;annPump()},SH(a)?2700:4300)}
 function toast2(a){const d=document.createElement('div'),w=a.kind==='rev'&&a.t==='W'||a.kind==='death';d.style.cssText='position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:240;pointer-events:none;background:#120d09f2;border:3px solid '+(w?'#c33':'#6a6')+';border-radius:12px;padding:10px 14px;text-align:center;max-width:92vw;box-shadow:0 8px 30px #000a';
-d.innerHTML=a.kind==='rev'?`🔍 <b>${esc(a.name)}</b> ถูกเปิด Tryal ใบที่ ${a.i+1}<br><small>(${WHY[a.why]||''})</small><br>${tf(a.t,64)}<br><b style="font-size:18px">${LBL[a.t]}</b>`:`☠ <b>${esc(a.name)}</b> เสียชีวิต<br><small>ไพ่ Tryal ทั้งหมดของเขา:</small><br><div class="row">${a.cards.map(t=>tf(t,40)).join('')}</div>`;
-document.body.appendChild(d);d.animate([{opacity:0,transform:'translate(-50%,-20px)'},{opacity:1,transform:'translate(-50%,0)',offset:.1},{opacity:1,offset:.9},{opacity:0}],{duration:4200}).onfinish=()=>d.remove()}
+d.innerHTML=a.kind==='ab'?`✨ <b>${esc(a.name)}</b> ใช้ความสามารถ<br><small>${esc(TH[a.ch]?TH[a.ch][0]:'')}</small><br>${esc(a.txt)}`:a.kind==='draw'?`🃏 <b>${esc(a.name)}</b> จั่วได้<br><div class="row" style="justify-content:center;margin-top:4px">${a.cards.map(k=>card(k,58)).join('')}</div>`:a.kind==='rev'?`🔍 <b>${esc(a.name)}</b> ถูกเปิด Tryal ใบที่ ${a.i+1}<br><small>(${WHY[a.why]||''})</small><br>${tf(a.t,64)}<br><b style="font-size:18px">${LBL[a.t]}</b>`:`☠ <b>${esc(a.name)}</b> เสียชีวิต<br><small>ไพ่ Tryal ทั้งหมดของเขา:</small><br><div class="row">${a.cards.map(t=>tf(t,40)).join('')}</div>`;
+document.body.appendChild(d);d.animate([{opacity:0,transform:'translate(-50%,-20px)'},{opacity:1,transform:'translate(-50%,0)',offset:.1},{opacity:1,offset:.9},{opacity:0}],{duration:SH(a)?2600:4200}).onfinish=()=>d.remove()}
 function youDied(){const d=document.createElement('div');d.className='ov';d.style.cssText='z-index:260;background:radial-gradient(circle,#5a0a0aee,#000f)';d.onclick=()=>d.remove();d.innerHTML='<div style="background:#1a0707;border:3px solid #a22"><h1 style="font-size:48px;margin:0">☠</h1><h2>คุณตายแล้ว</h2><p>ไพ่ Tryal ของคุณถูกเปิดทั้งหมด<br>ยังดูเกมต่อและพิมพ์แชทได้ แต่เล่นการ์ดไม่ได้แล้ว</p><small>แตะเพื่อปิด</small></div>';document.body.appendChild(d)}
 const zs=(t,k,h)=>U.c===null?`<span style="cursor:zoom-in" onclick="event.stopPropagation();zoom('${t}','${k}')">${h}</span>`:h;
 window.zoom=(t,k)=>{const L={W:'แม่มด',N:'ไม่ใช่แม่มด',C:'ตำรวจเมือง'};const h=t==='c'?card(k,250):t==='h'?chc(k,250):tf(k,210),tx=t==='c'?`<b>${esc(CD[k][1])}</b><br>${esc(CD[k][2]||'ลงเพื่อเพิ่มการกล่าวหา 1')}`:t==='h'?`<b>${esc(TH[k][0])}</b> (${esc(TH[k][1])})<br>${esc(TH[k][2])}`:`<b>${L[k]}</b>`;
 const d=document.createElement('div');d.className='ov';d.style.zIndex=250;d.onclick=()=>d.remove();d.innerHTML=`<div>${h}<p>${tx}</p><small>แตะที่ใดก็ได้เพื่อปิด</small></div>`;document.body.appendChild(d)};
 const need=k=>k==='rob'||k==='sca'?2:1;
-window.hc=i=>{const s=S,p=me();if(s.ph!=='play'||s.pend||s.mode==='draw'||s.players[s.turn]!==p)return;U.c=i;U.tg=null;render()};
-window.sc=id=>{if(U.c===null||id===uid)return;const k=me().hand[U.c];if(need(k)===2&&!U.tg){U.tg=id;render();return}const a={t:'play',i:U.c,tg:need(k)===2?U.tg:id};if(need(k)===2)a.t2=id;U.c=null;U.tg=null;send(a)};
+window.hc=i=>{const s=S,p=me();if(s.ph!=='play'||s.pend||s.mode==='draw'||s.players[s.turn]!==p)return;U.c=i;U.tg=null;U.as=0;render()};
+window.sc=id=>{if(U.c===null||id===uid)return;const k=me().hand[U.c];if(need(k)===2&&!U.tg){U.tg=id;render();return}const a={t:'play',i:U.c,tg:need(k)===2?U.tg:id};if(need(k)===2)a.t2=id;if(U.as&&k==='ali'&&ef(me())==='Will Griggs')a.as=1;U.as=0;U.c=null;U.tg=null;send(a)};
 function seat(p,i,n,m){const k=(i-m+n)%n,th=Math.PI/2+2*Math.PI*k/n,x=50+40*Math.cos(th),y=48+36*Math.sin(th),mine=p.id===uid,cur=S.ph==='play'&&S.players[S.turn]===p,end=S.ph==='end';
 const tg=U.c!==null&&p.alive&&!mine;const nT=Math.max(p.tryal?.length||4,4);const tw=Math.max(12,Math.min(24,130/nT));
-const acc=redSum(p),need=p.ch==='George Burroughs'?8:7;
+const acc=redSum(p),need=ef(p)==='George Burroughs'?8:7;
 return `<div data-id="${p.id}" class="seat ${cur?'cur':''} ${p.alive?'':'dead'} ${tg?'tg':''} ${mine?'seat-me':''}" style="left:${x}%;top:${y}%" ${tg?`onclick="sc('${p.id}')"`:''}>
 ${cur?`<div class="seat-turn">▶ ตานี้</div>`:''}
 <div class="seat-name">${esc(p.name)}${mine?' <span class="you-tag">คุณ</span>':''}${p.id===S.cat?' 🐈‍⬛':''}${p.alive?'':' ☠'}</div>
@@ -354,19 +408,24 @@ else if(S.ph==='reveal')msg='รอผู้เล่นอื่นดูบท
 if(S.ph==='arr'){if(!p.ar&&!U.arrSent){if(!U.arr||U.arr.length!==p.tryal.length)U.arr=p.tryal.map((_,i)=>i);ov=`<div class="ov"><div class="ov-sheet"><div class="ov-body"><h2>🃏 จัดลำดับไพ่ Tryal ของคุณ</h2><p>ลากการ์ดไปวางสลับตำแหน่งตามที่ต้องการ <span class="only-touch">(บนมือถือกดปุ่ม ◀ ▶ ใต้การ์ด)</span><br><small>คนอื่นจะเห็นเป็นไพ่คว่ำตามลำดับนี้ และเลือกหยิบด้วยตำแหน่ง</small></p><div class="row" style="gap:10px;margin:10px 0">${U.arr.map((idx,pos)=>`<div draggable="true" ondragstart="arrDS(${pos})" ondragend="U.drag=null" ondragenter="this.style.outline='3px dashed #ffd35a'" ondragleave="this.style.outline=''" ondragover="event.preventDefault()" ondrop="arrDrop(${pos})" style="text-align:center;cursor:grab">${tf(p.tryal[idx].t,78)}<br><small>ใบที่ ${pos+1}</small><div class="arr-btns"><button onclick="arrMv(${pos},-1)" ${pos===0?'disabled':''}>◀</button><button onclick="arrMv(${pos},1)" ${pos===U.arr.length-1?'disabled':''}>▶</button></div></div>`).join('')}</div><button onclick="arrOk()">ยืนยันลำดับ ✔</button></div></div></div>`}else ov=`<div class="ov"><div class="ov-sheet"><div class="ov-body"><h2>🃏 จัดลำดับไพ่แล้ว</h2><p>รอผู้เล่นคนอื่นจัดไพ่… (${S.players.filter(x=>x.ar).length}/${S.players.length})</p></div></div></div>`}
 if(S.ph==='wsee'){const ws=S.players.filter(hasW);ov=`<div class="ov" style="background:#000e"><div class="ov-sheet"><div class="ov-body"><h2>👁 แม่มดลืมตา</h2>${hasW(p)?`<p>แม่มดทั้งหมดในเกมตอนนี้:</p>${ws.map(w=>`<div style="font-size:18px">🧙 ${esc(w.name)}${w===p?' (คุณ)':''}</div>`).join('')}`:'<p>แม่มดกำลังลืมตาดูกันเอง…<br>(หลับตาไว้ ห้ามแอบดู)</p>'}</div>${hasW(p)?`<div class="ov-foot"><button ${p.wr?'disabled':''} onclick="sd({t:'wready'})">${p.wr?'รอแม่มดคนอื่น…':'รับทราบ ✔'}</button></div>`:''}</div></div>`}
 if(S.ph==='morn'){const rs=S.morn.res;ov=`<div class="ov" style="background:radial-gradient(circle,#4a3a1ae0,#000d)"><div><h2>🌅 รุ่งเช้า</h2><p style="font-size:18px">${rs.k==='dead'?`💀 ${esc(rs.name)} ถูกฆ่าตายเมื่อคืนนี้`:'เมื่อคืนไม่มีใครเสียชีวิต'}</p><p>เกมจะดำเนินต่อในไม่กี่วินาที…</p></div></div>`}
-if(S.ph==='dawn'){const ws=S.players.filter(hasW);ov=`<div class="ov"><div><h2>🌅 Dawn</h2>${hasW(p)?`<p>แม่มดในเกม: ${ws.map(w=>esc(w.name)).join(', ')}</p><p>เลือกผู้รับ Black Cat (เขาจะเป็นคนเริ่มเล่น):</p>${S.players.map(x=>`<button onclick="sd({t:'cat',tg:'${x.id}'})">${esc(x.name)}</button>`).join('')}`:'<p>แม่มดกำลังเลือกผู้รับแมวดำ… (หลับตาไว้)</p>'}</div></div>`}
-if(S.ph==='night'&&p.alive){const c=S.night.cf.includes(p.id),ot=al(S);ov=`<div class="ov" style="background:#000e"><div><div>${card('non',80)}</div><h2>🌙 Night — <span id="cd">${Math.max(0,Math.ceil((S.night.end-Date.now())/1000))}</span> วินาที</h2>${hasW(p)?`<p>🧙 แม่มดทั้งหมดตอนนี้: <b>${S.players.filter(x=>x.alive&&hasW(x)).map(x=>esc(x.name)+((S.night.nw||[]).includes(x.id)?' 🆕':'')).join(', ')}</b><br><small>🆕 = เพิ่งกลายเป็นแม่มด (เป็นแม่มดแล้วเป็นตลอดไป)</small></p><p>โหวตคนที่จะฆ่า: คนที่ได้โหวตสูงสุด (ไม่เสมอ) จะตายตอนเช้า ถ้าไม่สารภาพหรือไม่ถูกช่วย</p>${ot.map(x=>{const c=Object.values(S.night.k).filter(v=>v===x.id).length;return `<button onclick="sd({t:'nk',tg:'${x.id}'})" style="${S.night.k[uid]===x.id?'outline:3px solid #fff':''}">${esc(x.name)}${c?` (${c})`:''}</button>`}).join('')}`:''}${isC(p)?`<p>⚖ Constable: เลือกคนที่จะช่วย (ห้ามเลือกตัวเอง)</p>${ot.filter(x=>x!==p).map(x=>`<button onclick="sd({t:'ns',tg:'${x.id}'})" style="${S.night.sv===x.id?'outline:3px solid #fff':''}">${esc(x.name)}</button>`).join('')}`:''}<hr>${c?'<p>คุณสารภาพแล้ว — ปลอดภัยคืนนี้</p>':U.conf?`<p>เลือก Tryal ของคุณที่จะเปิดเพื่อสารภาพ:</p><div class="row">${unrev(p).map(i=>`<span onclick="U.conf=0;sd({t:'conf',i:${i}})">${tf(p.tryal[i].t,70,'cd')}</span>`).join('')}</div>`:`<button onclick="U.conf=1;render()">🙏 Confess (สารภาพ)</button>`}<p style="font-size:12px">ถ้าเป็นคนอื่นที่ไม่มีบทบาท ให้หลับตา/รอ</p></div></div>`}
+if(S.ph==='dawn'){const ws=S.players.filter(hasW);ov=`<div class="ov"><div><h2>🌅 Dawn</h2><p style="font-size:20px">⏳ <span id="cd">${Math.max(0,Math.ceil((S.dawnEnd-Date.now())/1000))}</span> วินาที</p>${hasW(p)?`<p>แม่มดในเกม: ${ws.map(w=>esc(w.name)).join(', ')}</p><p>โหวตผู้รับ Black Cat (เขาจะเป็นคนเริ่มเล่น) — ได้คะแนนสูงสุดเมื่อหมดเวลาเป็นผู้รับ ถ้าเสมอสุ่มจากคนที่เสมอ:</p>${S.players.map(x=>{const c=Object.values(S.cv||{}).filter(v=>v===x.id).length;return `<button onclick="sd({t:'cat',tg:'${x.id}'})" style="${(S.cv||{})[uid]===x.id?'outline:3px solid #fff':''}">${esc(x.name)}${c?` (${c})`:''}</button>`}).join('')}`:'<p>แม่มดกำลังเลือกผู้รับแมวดำ…<br>(หลับตาไว้ รอจนหมดเวลา)</p>'}<div id="petslot" style="margin-top:8px;min-height:86px"></div></div></div>`}
+if(S.ph==='night'&&p.alive){const c=S.night.cf.includes(p.id),ot=al(S);ov=`<div class="ov" style="background:#000e"><div><div>${card('non',80)}</div><h2>🌙 Night — <span id="cd">${Math.max(0,Math.ceil((S.night.end-Date.now())/1000))}</span> วินาที</h2>${hasW(p)?`<p>🧙 แม่มดทั้งหมดตอนนี้: <b>${S.players.filter(x=>x.alive&&hasW(x)).map(x=>esc(x.name)+((S.night.nw||[]).includes(x.id)?' 🆕':'')).join(', ')}</b><br><small>🆕 = เพิ่งกลายเป็นแม่มด (เป็นแม่มดแล้วเป็นตลอดไป)</small></p><p>โหวตคนที่จะฆ่า: คนที่ได้โหวตสูงสุด (ไม่เสมอ) จะตายตอนเช้า ถ้าไม่สารภาพหรือไม่ถูกช่วย</p>${ot.map(x=>{const c=Object.values(S.night.k).filter(v=>v===x.id).length;return `<button onclick="sd({t:'nk',tg:'${x.id}'})" style="${S.night.k[uid]===x.id?'outline:3px solid #fff':''}">${esc(x.name)}${c?` (${c})`:''}</button>`}).join('')}`:''}${isC(p)?`<p>⚖ Constable: เลือกคนที่จะช่วย (ห้ามเลือกตัวเอง)</p>${ot.filter(x=>x!==p).map(x=>`<button onclick="sd({t:'ns',tg:'${x.id}'})" style="${S.night.sv===x.id?'outline:3px solid #fff':''}">${esc(x.name)}</button>`).join('')}`:''}<hr>${c?'<p>คุณสารภาพแล้ว — ปลอดภัยคืนนี้</p>':U.conf?`<p>เลือก Tryal ของคุณที่จะเปิดเพื่อสารภาพ:</p><div class="row">${unrev(p).map(i=>`<span onclick="U.conf=0;sd({t:'conf',i:${i}})">${tf(p.tryal[i].t,70,'cd')}</span>`).join('')}</div>`:`<button onclick="U.conf=1;render()">🙏 Confess (สารภาพ)</button>`}${!c&&ef(p)==='William Phips'&&AU(p,'phips')<1?`<p><button ${AB_BTN} onclick="U.conf=0;sd({t:'conf',free:1})">✨ Phips: สารภาพโดยไม่ต้องเปิด Tryal (ครั้งเดียวในเกม)</button></p>`:''}<p style="font-size:12px">ถ้าเป็นคนอื่นที่ไม่มีบทบาท ให้หลับตา/รอ</p></div></div>`}
 if(S.ph==='cons'){const c=S.cons,d=p.alive?donor(S,p):null,by=P(S,c.by),done=c.picks[uid]!==undefined,can=d&&d!==p&&unrev(d).length;ov=`<div class="ov" style="background:radial-gradient(circle,#3a0c0cf2,#000 80%)"><div style="background:#140909;border:2px solid #8a2a2a;box-shadow:0 0 40px #8a2a2a"><h2>🔮 สมคบคิด!</h2><div>${card('con',110)}</div><p>${esc(by.name)} จั่วได้ Conspiracy<br>ทุกคนต้องหยิบ Tryal 1 ใบจากผู้เล่นทางซ้าย (เหลือ <span id="cd">${Math.max(0,Math.ceil((c.end-Date.now())/1000))}</span> วินาที)</p>${!p.alive?'<p>คุณตายแล้ว — รอดูผล</p>':done?`<p>✔ คุณเลือกแล้ว รอคนอื่น (${Object.keys(c.picks).length}/${al(S).length})</p>`:can?`<p>เลือก Tryal ของ <b>${esc(d.name)}</b> (ผู้เล่นทางซ้าย) 1 ใบ — เลือกแบบไม่เห็นหน้าไพ่</p><div class="row">${d.tryal.map((t,i)=>t.rev?tf(t.t,60):`<span onclick="sd({t:'cpick',i:${i}})">${tb(60).replace('<svg','<svg class=cd')}</span>`).join('')}</div>`:'<p>ไม่มีไพ่ให้หยิบ รอคนอื่น…</p>'}</div></div>`}
 if(S.ph==='night'&&!p.alive)msg='🌙 กลางคืน…';
-const pe=S.pend;if(pe&&pe.by===uid&&S.ph==='play'){if(pe.t==='rev'){const t=P(S,pe.tgt);ov=`<div class="ov"><div><h3>เลือก Tryal ของ ${esc(t.name)} ที่จะเปิด</h3><div class="row">${t.tryal.map((x,i)=>x.rev?tf(x.t,60):`<span onclick="sd({t:'rev',i:${i}})">${tb(60).replace('<svg','<svg class=cd')}</span>`).join('')}</div></div></div>`}else ov=`<div class="ov"><div><h3>ไพ่เกิน 7 ใบ เลือกใบที่จะทิ้ง</h3><div class="hand">${p.hand.map((k,i)=>`<span onclick="sd({t:'dis',i:${i}})">${card(k,70)}</span>`).join('')}</div></div></div>`}
+const pe=S.pend;if(pe&&pe.by===uid&&S.ph==='play'){if(pe.t==='rev'){const t=P(S,pe.tgt);ov=`<div class="ov"><div>${revAb(pe,p)}<h3>เลือก Tryal ของ ${esc(t.name)} ที่จะเปิด</h3><div class="row">${t.tryal.map((x,i)=>x.rev?tf(x.t,60):`<span onclick="sd({t:'rev',i:${i}})">${tb(60).replace('<svg','<svg class=cd')}</span>`).join('')}</div></div></div>`}else if(pe.t==='ab'){ov=abOv(pe,p)}else ov=`<div class="ov"><div><h3>ไพ่เกิน 7 ใบ เลือกใบที่จะทิ้ง</h3><div class="hand">${p.hand.map((k,i)=>`<span onclick="sd({t:'dis',i:${i}})">${card(k,70)}</span>`).join('')}</div></div></div>`}
 if(S.ph==='end'&&!U.endClosed)ov=`<div class="ov"><div><h1>${S.win==='town'?'🏆 ชาวบ้านชนะ!':'🏆 แม่มดชนะ!'}</h1><p>${esc(S.winWhy||(S.win==='town'?'เปิด Witch ครบทุกใบแล้ว':'แม่มดครองเมือง'))}</p><p>แม่มด: ${S.players.filter(x=>x.w||x.tryal.some(t=>t.t==='W')).map(x=>esc(x.name)).join(', ')}</p>${isHost?'<button onclick="sd({t:\'rematch\'})">🔄 กลับล็อบบี้ / เล่นอีกรอบ</button>':'<p>รอหัวหน้าห้องกดเล่นอีกรอบ…</p>'}<button onclick="U.endClosed=1;render()" style="background:#555">ดูโต๊ะต่อ</button><button onclick="leave()" style="background:#6b3a2a">ออกจากห้อง</button></div></div>`;
 
-if(my)msg=U.c===null?''+(S.mode==='play'?'เล่นการ์ดต่อได้ หรือกด จบตา (จั่วไม่ได้แล้วในตานี้)':'ตาของคุณ: เลือก จั่ว 2 ใบ (แล้วเล่นการ์ดไม่ได้) หรือ คลิกการ์ดในมือเพื่อเล่น (แล้วจั่วไม่ได้)')+'':(need(p.hand[U.c])===2?(U.tg?'เลือกผู้เล่นปลายทาง':'เลือกผู้เล่นต้นทาง'):'เลือกผู้เล่นเป้าหมาย')+' <button onclick="cancel()">ยกเลิก</button>';
+if(my)msg=U.c===null?''+(S.mode==='play'?'เล่นการ์ดต่อได้ หรือกด จบตา (จั่วไม่ได้แล้วในตานี้)':'ตาของคุณ: เลือก จั่ว 2 ใบ (แล้วเล่นการ์ดไม่ได้) หรือ คลิกการ์ดในมือเพื่อเล่น (แล้วจั่วไม่ได้)')+'':(need(p.hand[U.c])===2?(U.tg?'เลือกผู้เล่นปลายทาง':'เลือกผู้เล่นต้นทาง'):'เลือกผู้เล่นเป้าหมาย')+((p.hand[U.c]==='ali'&&ef(p)==='Will Griggs')?` <button onclick="U.as=!U.as;render()" style="background:#6b4a10;border:2px solid #ffd35a">${U.as?'✔ ใช้เป็นพยาน (7 การกล่าวหา)':'✨ Griggs: ใช้เป็นพยาน (7) แทน'}</button>`:'')+' <button onclick="cancel()">ยกเลิก</button>';
 else if(S.ph==='play')msg=pe?'รอ '+esc(P(S,pe.by).name)+' เลือก…':'ตาของ '+esc(cur.name);
 if(!ov&&S.cr&&S.cr.k!==U.crSeen&&S.cr.map[uid]&&S.ph!=='cons'){const m=S.cr.map[uid],nm={W:'แม่มด',N:'ไม่ใช่แม่มด',C:'ตำรวจเมือง'};ov=`<div class="ov" style="background:radial-gradient(circle,#3a0c0cf2,#000 80%)"><div style="background:#140909;border:2px solid #8a2a2a"><h2>🔁 ผลของสมคบคิด (เห็นเฉพาะคุณ)</h2><div style="display:flex;gap:18px;justify-content:center;flex-wrap:wrap"><div><b style="color:#7fe0ff">⬅ คุณได้ไพ่</b><br>${m.got?tf(m.got.t,90)+`<br>${nm[m.got.t]}<br><small>จาก ${esc(m.got.from)}</small>`:'<br>ไม่ได้ไพ่ใหม่'}</div><div><b style="color:#ff9a7f">➡ คุณเสียไพ่</b><br>${m.lost?tf(m.lost.t,90)+`<br>${nm[m.lost.t]}<br><small>ให้ ${esc(m.lost.to)}</small>`:'<br>ไม่เสียไพ่'}</div></div><p>(เคยเป็นแม่มดแล้วเป็นตลอดไป)<br>ตอนนี้คุณอยู่ฝั่ง: <b>${hasW(p)?'🧙 แม่มด':'⛪ ชาวบ้าน'}${isC(p)?' + ตำรวจเมือง':''}</b></p><div class="row">${p.tryal.map(t=>tf(t.t,46,t.rev?'rv':'')).join('')}</div><br><button onclick="U.crSeen=S.cr.k;render()">รับทราบ ✔</button></div></div>`}
+if(!ov&&my&&!S.mode&&U.tit&&ef(p)==='Tituba'){const n=S.deck.length-(S.deck[0]==='non'?1:0),v=S.deck.slice(S.deck.length-n).reverse();if(!U.tit.o||U.tit.o.length!==n)U.tit.o=v.map((_,i)=>i);
+const tb=`<button onclick="titOk()">ยืนยันลำดับ ✔</button> <button onclick="U.tit=null;render()" style="background:#555">ยกเลิก</button>`;
+ov=`<div class="ov"><div class="ov-sheet"><div class="ov-body"><h2>🔮 Tituba: จัดลำดับไพ่ในกองจั่วทั้งกอง</h2><p>ลากการ์ดไปวางสลับตำแหน่งตามที่ต้องการ <span class="only-touch">(บนมือถือกดปุ่มใต้การ์ด)</span><br><small>ใบที่ 1 = ใบบนสุดที่จะถูกจั่วก่อน · คุณเห็นคนเดียว · มีทั้งหมด ${n} ใบ${S.deck[0]==='non'?' · ไพ่ค่ำคืนยังอยู่ใต้สุดของกองเสมอ':''}</small></p><p>${tb}</p><div class="row" style="gap:8px;margin:10px 0;justify-content:center">${U.tit.o.map((idx,pos)=>`<div draggable="true" ondragstart="titDS(${pos})" ondragend="U.drag=null" ondragenter="this.style.outline='3px dashed #ffd35a'" ondragleave="this.style.outline=''" ondragover="event.preventDefault()" ondrop="titDrop(${pos})" style="text-align:center;cursor:grab;width:62px">${card(v[idx],56)}<br><small>ใบที่ ${pos+1}</small><div class="arr-btns"><div style="display:flex;gap:2px;justify-content:center"><button style="padding:2px 6px" onclick="titTo(${pos},0)" ${pos===0?'disabled':''}>⇤</button><button style="padding:2px 6px" onclick="titMv(${pos},-1)" ${pos===0?'disabled':''}>◀</button><button style="padding:2px 6px" onclick="titMv(${pos},1)" ${pos===n-1?'disabled':''}>▶</button><button style="padding:2px 6px" onclick="titTo(${pos},1)" ${pos===n-1?'disabled':''}>⇥</button></div></div></div>`).join('')}</div>${tb}</div></div></div>`}
+if(!ov&&my&&!S.mode&&U.par&&ef(p)==='Samuel Parris'){ov=`<div class="ov"><div style="max-width:560px"><h3>📥 Parris: เลือกไพ่จากกองทิ้ง (สูงสุด 2 ใบ)</h3><p><small>ไม่รวมใบสมคบคิด · จั่วแบบนี้แทนการจั่วจากกอง และจบตาทันที</small></p><div class="row" style="gap:6px;max-height:50vh;overflow:auto">${S.disc.map((k,i)=>k==='con'?'':`<span onclick="parTg(${i})" style="${U.par.includes(i)?'outline:3px solid #7fe0ff;border-radius:8px':''}">${card(k,54)}</span>`).join('')}</div><p>เลือกแล้ว ${U.par.length}/2</p><button onclick="parOk()" ${U.par.length?'':'disabled'}>ยืนยัน ✔</button> <button onclick="U.par=null;render()" style="background:#555">ยกเลิก</button></div></div>`}
 let actHtml=msg,deckMsg='';if(my&&U.c===null){actHtml='';deckMsg=S.mode==='play'?'<button class="btn-end" onclick="sd({t:\'end\'})">จบตา</button><div class="turn-note">เล่นการ์ดต่อได้ หรือกด จบตา (ตานี้จั่วไม่ได้แล้ว)</div>':(S.mode?'':'<div class="turn-big">ตาของคุณแล้ว! กดจั่วสองใบได้ที่กองการ์ด หรือเล่นการ์ดของคุณแล้วกด "จบตา"</div>')}
+if(my&&U.c===null&&!S.mode){const tb2=turnAb(p);if(tb2)deckMsg+=`<div>${tb2}</div>`}
 const revW=S.players.flatMap(x=>x.tryal).filter(t=>t.t==='W'&&t.rev).length,wb=`<div class="pn" style="font-size:13px;text-align:center">🧙 ใบแม่มดรอบนี้: <b>${S.wc}</b> ใบ จาก Tryal ทั้งหมด ${S.tc} ใบ · เปิดแล้ว ${revW}/${S.wc}</div>`;
-const ld=S.ld,lp=S.lp,strip=(ld||lp)?`<div class="action-strip">${ld?`<div class="as-item"><span class="as-label">${esc(ld.n)} จั่ว</span><div class="row">${ld.k.map(k=>k==='con'||k==='non'||ld.who===uid?zs('c',k,card(k,28)):cbk(28)).join('')}</div></div>`:''}${lp?`<div class="as-item"><span class="as-label">${esc(lp.n)} → ${esc(lp.t)}</span><div>${zs('c',lp.k,card(lp.k,28))}</div></div>`:''}</div>`:'';
+const ld=S.ld,lp=S.lp,strip=(ld||lp)?`<div class="action-strip">${ld?`<div class="as-item"><span class="as-label">${esc(ld.n)} จั่ว</span><div class="row">${ld.k.map(k=>zs('c',k,card(k,28))).join('')}</div></div>`:''}${lp?`<div class="as-item"><span class="as-label">${esc(lp.n)} → ${esc(lp.t)}</span><div>${zs('c',lp.k,card(lp.k,28))}</div></div>`:''}</div>`:'';
 topStrip=strip;
 A.innerHTML=`${S.ph==='end'?`<div class="pn" style="text-align:center">🏁 เกมจบแล้ว — ${S.win==='town'?'ชาวบ้านชนะ':'แม่มดชนะ'} ${isHost?'<button onclick="sd({t:\'rematch\'})">🔄 กลับล็อบบี้ / เล่นอีกรอบ</button>':'<br>รอหัวหน้าห้องกดเล่นอีกรอบ'}</div>`:''}${p.alive?'':'<div style="background:#6b1010;border-radius:10px;padding:10px;text-align:center;font-size:16px;margin:6px 0">☠ คุณตายแล้ว — ยังดูเกมต่อและใช้แชทได้ แต่เล่นการ์ดไม่ได้แล้ว</div>'}${wb}<div id="tbl">${ring()}${S.players.map((x,i)=>seat(x,i,n,m)).join('')}<div class="ctr"><div class="deck-click ${my&&!S.mode?'':'disabled'}" role="button" tabindex="0" title="${my&&!S.mode?'คลิกเพื่อจั่ว 2 ใบและจบตา':'รอให้ถึงตาของคุณ'}" onclick="deckClick()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();deckClick()}">${card('non',60).replace(/<text[^]*?<\/text>/g,'')}<div>กองจั่ว ${S.deck?S.deck.length:0}<br>ทิ้ง ${S.disc?S.disc.length:0}</div><small style="color:#ffd35a">${my&&!S.mode?'คลิกเพื่อจั่ว 2 ใบ':''}</small></div></div>${deckMsg?`<div class="deck-msg">${deckMsg}</div>`:''}</div>
 <div class="pn player-panel">
@@ -381,7 +440,7 @@ A.innerHTML=`${S.ph==='end'?`<div class="pn" style="text-align:center">🏁 เ�
 <div class="pp-actions">${actHtml}</div>${deckMsg?`<div class="mobile-turn-msg">${deckMsg}</div>`:''}
 
 </div>${ov}`}
-function leaveLocal(m){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];clearJoinRetry();annInit=false;annQ.length=0;S=null;code=null;CHAT=[];chKey='';isHost=false;seen={};q=[];U={c:null,tg:null,conf:0};try{sessionStorage.removeItem('sl')}catch(e){}NOTE=m||'';home();chatRender()}
+function leaveLocal(m){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];clearJoinRetry();annInit=false;annQ.length=0;S=null;code=null;CHAT=[];chKey='';isHost=false;seen={};q=[];U={c:null,tg:null,conf:0};try{sessionStorage.removeItem('sl')}catch(e){}NOTE=m||'';home();chatRender();try{petCatSync()}catch(e){}}
 window.leave=()=>{if(S){U.lv=1;render()}};window.lvNo=()=>{U.lv=0;render()};
 window.lvYes=async()=>{U.lv=0;if(isHost){S.closed=1;try{await db.doc('rooms/'+code).set({s:JSON.stringify(S)})}catch(e){}}else{send({t:'leave'});await new Promise(r=>setTimeout(r,500))}leaveLocal()};
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches,q1=x=>document.querySelector(x);let prevS=null;
@@ -409,10 +468,82 @@ if(op.alive&&!p.alive)bump(seatEl(p.id),[{transform:TS+' rotate(0)'},{transform:
 if(S.log.slice(-6).some(l=>l.includes('🔁')&&!o.log.includes(l))){const a=S.players.filter(x=>x.alive);a.forEach((x,i)=>fly(seatEl(a[(i+1)%a.length].id),seatEl(x.id),tb(34),i*60,1100));conspArrows(a)}
 if(o.ph!==S.ph&&!RM)document.querySelectorAll('.ov>div').forEach(d=>d.animate([{opacity:0,transform:'scale(.9)'},{opacity:1,transform:'scale(1)'}],{duration:450}));
 if(o.turn!==S.turn&&S.ph==='play')bump(seatEl(S.players[S.turn].id),[{transform:TS+' scale(1)'},{transform:TS+' scale(1.14)'},{transform:TS+' scale(1)'}])}finally{prevS=S?JSON.parse(JSON.stringify(S)):null}}
-const r0=render;render=function(){try{chatRender()}catch(e){console.error(e)}if(!S||S.closed){prevS=null;return r0()}
-const ovScroll=document.querySelector('.ov-body,.ov>div');const ovY=ovScroll?ovScroll.scrollTop:0;
-topStrip='';r0();
-const ov2=document.querySelector('.ov-body,.ov>div');if(ov2&&ovY)ov2.scrollTop=ovY;
+
+/* ===== น้องแมวให้ลูบ: อยู่ในหน้าต่าง Dawn (ย้ายโหนดเดิมเข้าช่อง #petslot ทุกครั้งที่วาดใหม่ จึงไม่รีเซ็ต) ===== */
+let _pc=null;
+function petCatKill(){if(_pc){clearInterval(_pc._bl);_pc.remove();_pc=null}}
+function petCatBuild(){
+const d=document.createElement('div');d.id='petcat';d.style.cssText='position:relative;display:inline-block;width:96px;user-select:none;-webkit-user-select:none';
+d.innerHTML=`<div id="pc-hearts" style="position:absolute;left:0;right:0;top:0;height:0;pointer-events:none"></div>
+<svg viewBox="0 0 100 84" width="96" style="display:block;overflow:visible">
+<g id="pc-tail" style="transform-box:fill-box;transform-origin:0% 100%"><path d="M86 68q13-1 9-15" fill="none" stroke="#e8924a" stroke-width="7" stroke-linecap="round"/></g>
+<g id="pc-body" style="transform-box:fill-box;transform-origin:50% 100%">
+<g id="pc-ears"><path d="M19 32L22 8L43 23Z" fill="#f5a45d"/><path d="M81 32L78 8L57 23Z" fill="#f5a45d"/><path d="M24 26L25 15L35 23Z" fill="#f7b7b0"/><path d="M76 26L75 15L65 23Z" fill="#f7b7b0"/></g>
+<path d="M10 64C4 36 22 21 50 21C78 21 96 36 90 64C88 75 70 80 50 80C30 80 12 75 10 64Z" fill="#f5a45d"/>
+<path d="M44 24q-1 7 0 11M50 23q0 8 0 12M56 24q1 7 0 11" stroke="#e8924a" stroke-width="3" fill="none" stroke-linecap="round"/>
+<ellipse id="pc-b1" cx="26" cy="58" rx="7" ry="4.5" fill="#f58a8a" opacity=".45"/><ellipse id="pc-b2" cx="74" cy="58" rx="7" ry="4.5" fill="#f58a8a" opacity=".45"/>
+<g id="pc-open"><ellipse cx="34" cy="48" rx="9.5" ry="8.5" fill="#fff" stroke="#3b2a22" stroke-width="2"/><ellipse cx="66" cy="48" rx="9.5" ry="8.5" fill="#fff" stroke="#3b2a22" stroke-width="2"/><circle cx="36" cy="49" r="4.4" fill="#3b2a22"/><circle cx="64" cy="49" r="4.4" fill="#3b2a22"/><circle cx="37.6" cy="47.3" r="1.5" fill="#fff"/><circle cx="65.6" cy="47.3" r="1.5" fill="#fff"/></g>
+<g id="pc-closed" style="display:none"><path d="M26 50q8-9 16 0M58 50q8-9 16 0" stroke="#3b2a22" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>
+<path d="M47.5 57h5l-2.5 3Z" fill="#e8798a"/><path d="M50 60q-3 4-6 1.5M50 60q3 4 6 1.5" stroke="#6a4a3a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<path d="M22 60l-14-2M22 64l-13 4M78 60l14-2M78 64l13 4" stroke="#fff" stroke-width="1.2" opacity=".85" stroke-linecap="round"/>
+<ellipse cx="34" cy="80" rx="9" ry="4.5" fill="#fbd9ae"/><ellipse cx="66" cy="80" rx="9" ry="4.5" fill="#fbd9ae"/>
+<circle id="pc-hit" cx="50" cy="48" r="44" fill="transparent" style="cursor:pointer;touch-action:manipulation"/>
+</g>
+<g transform="translate(50 6)" style="pointer-events:none"><g id="pc-hand" style="opacity:0;transform-box:fill-box;transform-origin:50% 0%">
+<rect x="-11" y="-22" width="22" height="15" rx="4" fill="#6f8fb8"/>
+<ellipse cx="-11.5" cy="3" rx="4" ry="6" transform="rotate(25 -11.5 3)" fill="#ffd9b3" stroke="#d9a47a" stroke-width="1.2"/>
+<rect x="-10" y="4" width="5" height="11" rx="2.5" fill="#ffd9b3" stroke="#d9a47a" stroke-width="1.2"/><rect x="-5" y="4" width="5" height="13" rx="2.5" fill="#ffd9b3" stroke="#d9a47a" stroke-width="1.2"/><rect x="0" y="4" width="5" height="13" rx="2.5" fill="#ffd9b3" stroke="#d9a47a" stroke-width="1.2"/><rect x="5" y="4" width="5" height="11" rx="2.5" fill="#ffd9b3" stroke="#d9a47a" stroke-width="1.2"/>
+<rect x="-10" y="-8" width="20" height="16" rx="7" fill="#ffd9b3" stroke="#d9a47a" stroke-width="1.2"/>
+</g></g></svg>
+<div id="pc-label" style="font-size:11px;opacity:.9;margin-top:2px">🐾 ลูบหัวน้อง <span id="pc-n">0</span></div>`;
+const $=i=>d.querySelector('#'+i),an=(e,k,o)=>(e&&e.animate&&!RM)?e.animate(k,o):null;
+const body=$('pc-body'),tail=$('pc-tail'),ears=$('pc-ears'),op=$('pc-open'),cl=$('pc-closed'),hit=$('pc-hit'),hand=$('pc-hand'),b1=$('pc-b1'),b2=$('pc-b2');let n=0,eyeT=null,busy=0,again=0;
+an(tail,[{transform:'rotate(-12deg)'},{transform:'rotate(16deg)'}],{duration:1600,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
+an(body,[{transform:'scale(1,1)'},{transform:'scale(1.02,1.04)'}],{duration:2300,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
+const eyes=c=>{op.style.display=c?'none':'';cl.style.display=c?'':'none'};
+d._bl=setInterval(()=>{if(eyeT)return;eyes(1);setTimeout(()=>{if(!eyeT)eyes(0)},130)},3400);
+const heart=()=>{const h=document.createElement('span');h.textContent=['♥','💗','✨'][Math.random()*3|0];h.style.cssText=`position:absolute;left:${20+Math.random()*56}px;top:14px;font-size:${11+Math.random()*7}px;color:#ff7a9a;pointer-events:none`;$('pc-hearts').appendChild(h);const a=an(h,[{transform:'translateY(0) scale(.6)',opacity:0},{opacity:1,offset:.2},{transform:'translateY(-34px) scale(1.1)',opacity:0}],{duration:950,easing:'ease-out'});if(a)a.onfinish=()=>h.remove();else setTimeout(()=>h.remove(),600)};
+const D=1100,EO={duration:D,easing:'ease-in-out'};
+const stroke=()=>{
+eyes(1);clearTimeout(eyeT);eyeT=setTimeout(()=>{eyeT=null;eyes(0)},D+300);
+/* มือยื่นลงมา ลูบซ้าย-ขวา 2 รอบ แล้วยกออก */
+const a=an(hand,[
+{opacity:0,transform:'translate(0px,-18px) rotate(0deg)',offset:0},
+{opacity:1,transform:'translate(0px,-6px) rotate(0deg)',offset:.14},
+{opacity:1,transform:'translate(-12px,3px) rotate(-10deg)',offset:.28},
+{opacity:1,transform:'translate(12px,4px) rotate(10deg)',offset:.48},
+{opacity:1,transform:'translate(-12px,4px) rotate(-10deg)',offset:.68},
+{opacity:1,transform:'translate(9px,3px) rotate(8deg)',offset:.84},
+{opacity:0,transform:'translate(0px,-18px) rotate(0deg)',offset:1}],EO);
+/* แมวเอียงตัวตามมือ หัวยุบลงนิดๆ */
+an(body,[
+{transform:'rotate(0deg) scale(1,1)',offset:0},
+{transform:'rotate(0deg) scale(1.03,.96)',offset:.16},
+{transform:'rotate(-3deg) scale(1.05,.92)',offset:.28},
+{transform:'rotate(3deg) scale(1.05,.92)',offset:.48},
+{transform:'rotate(-3deg) scale(1.05,.92)',offset:.68},
+{transform:'rotate(2deg) scale(1.03,.96)',offset:.84},
+{transform:'rotate(0deg) scale(1,1)',offset:1}],EO);
+/* หูแบนลง */
+an(ears,[{transform:'translateY(0px)'},{transform:'translateY(3px)',offset:.18},{transform:'translateY(3px)',offset:.84},{transform:'translateY(0px)'}],EO);
+/* หางกระดิกถี่ๆ ด้วยความสุข */
+an(tail,[{transform:'rotate(4deg)'},{transform:'rotate(26deg)'},{transform:'rotate(-10deg)'},{transform:'rotate(24deg)'},{transform:'rotate(-8deg)'},{transform:'rotate(18deg)'},{transform:'rotate(4deg)'}],EO);
+/* แก้มแดง */
+const bl=[{opacity:.45},{opacity:.95,offset:.2},{opacity:.95,offset:.84},{opacity:.45}];an(b1,bl,EO);an(b2,bl,EO);
+setTimeout(heart,300);setTimeout(heart,700);
+if(a){busy=1;a.onfinish=()=>{busy=0;if(again){again=0;stroke()}}}};
+const pet=()=>{n++;$('pc-n').textContent=n;if(n===12)$('pc-label').innerHTML='😻 น้องชอบมาก <span id="pc-n">'+n+'</span>';
+if(busy){again=1;heart();return}stroke()};
+hit.addEventListener('click',pet);
+d._bl=d._bl;return d}
+function petCatSync(){const want=S&&S.ph==='dawn'&&me()&&me().alive!==false;
+if(!want){petCatKill();return}
+const slot=document.getElementById('petslot');if(!slot)return;
+if(!_pc)_pc=petCatBuild();if(_pc.parentNode!==slot)slot.appendChild(_pc)}
+const r0=render;render=function(){try{chatRender()}catch(e){console.error(e)}try{petCatSync()}catch(e){console.error(e)}if(!S||S.closed){prevS=null;return r0()}
+const ovSel='.ov-body,.ov>div',ovYs=[...document.querySelectorAll(ovSel)].map(e=>e.scrollTop);
+topStrip='';r0();try{petCatSync()}catch(e){console.error(e)}
+{const ovL=[...document.querySelectorAll(ovSel)];if(ovL.length===ovYs.length)ovL.forEach((e,i)=>{if(ovYs[i])e.scrollTop=ovYs[i]})}
 try{anim()}catch(e){console.error(e)}try{annCheck()}catch(e){console.error(e)}A.insertAdjacentHTML('afterbegin','<div class="top-bar"><div class="top-strip">'+topStrip+'</div><div class="top-btns">'+(S.ph!=='lobby'?'<button onclick="abil()" class="btn-abil">📜 ความสามารถ</button>':'')+'<button onclick="leave()" class="btn-leave">🚪 ออก</button></div></div>');if(U.lv)A.insertAdjacentHTML('beforeend',`<div class="ov" style="z-index:99"><div><h3>ออกจากเกม?</h3><p>${isHost?'คุณเป็นหัวหน้าห้อง ถ้าออก ห้องจะถูกปิดสำหรับทุกคน':'ถ้าเกมเริ่มแล้ว บอทจะเล่นแทนคุณ'}</p><button onclick="lvYes()">ออกเลย</button><button onclick="lvNo()" style="background:#555">ยกเลิก</button></div></div>`)};
 let CHAT=[],chOpen=0,chTab='all',chSeen={all:0,witch:0},chKey='';
 function isMobile(){return window.matchMedia('(max-width:900px)').matches}
